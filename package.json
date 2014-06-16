@@ -1,0 +1,33 @@
+{
+  "name": "memoize-fs",
+  "version": "0.0.0",
+  "description": "memoize/cache in file system solution for JavaScript",
+  "author": {
+    "name": "Boris Diakur",
+    "email": "contact@borisdiakur.com",
+    "url": "https://github.com/borisdiakur"
+  },
+  "scripts": {
+    "test": "mocha test/testfiles"
+  },
+  "homepage": "https://github.com/borisdiakur/memoize-fs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borisdiakur/memoize-fs"
+  },
+  "engines": {
+    "node": ">= 0.10.12",
+    "npm": ">= 1.2.32"
+  },
+  "dependencies": {
+    "es6-promise": "~1.0.0",
+    "mkdirp": "~0.5.0",
+    "lodash": "~2.4.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.20.1",
+    "shelljs": "~0.3.0"
+  },
+  "private": false,
+  "main": "index.js"
+}
