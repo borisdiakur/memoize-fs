@@ -9,7 +9,7 @@ var assert = require('assert'),
 describe('memoize-fs |', function () {
 
     beforeEach(function (done) {
-        shell.rm('-rf', path.join(__dirname, '..', 'testdata', 'cache'));
+        shell.rm('-rf', path.join(__dirname, '../../build/cache'));
         done();
     });
 
@@ -49,9 +49,10 @@ describe('memoize-fs |', function () {
         describe('init cache |', function () {
 
             it('should create a cache folder before caching', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
-                memoize.fn(function () {}).then(function () {
+                memoize.fn(function () {}).then(function (memoized) {
+                    assert.strictEqual(typeof memoized, 'function', 'expected a memoized function to be passed as the only argument of the resolved handler');
                     fs.exists(cachePath, function (exists) {
                         assert.ok(exists, 'expected a cache folder with given path to exist');
                         done();
@@ -62,9 +63,10 @@ describe('memoize-fs |', function () {
             });
 
             it('should create a cache folder before caching', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
-                memoize.fn(function () {}, { cacheId: 'foobar' }).then(function () {
+                memoize.fn(function () {}, { cacheId: 'foobar' }).then(function (memoized) {
+                    assert.strictEqual(typeof memoized, 'function', 'expected a memoized function to be passed as the only argument of the resolved handler');
                     fs.exists(path.join(cachePath, 'foobar'), function (exists) {
                         assert.ok(exists, 'expected a cache folder with given path to exist');
                         done();
@@ -75,10 +77,10 @@ describe('memoize-fs |', function () {
             });
         });
 
-        describe('process fn |', function () {
+        describe('memoize fn |', function () {
 
             it('should return a rejecting promise instance if fn param is not provided', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
                 memoize.fn().then(function () {
                     done(Error('entered resolve handler instead of error handler'));
@@ -89,7 +91,7 @@ describe('memoize-fs |', function () {
             });
 
             it('should throw an errer when fn param is not of type function', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
                 memoize.fn('foobar').then(function () {
                     done(Error('entered resolve handler instead of error handler'));
@@ -100,7 +102,7 @@ describe('memoize-fs |', function () {
             });
 
             it('should throw an errer when salt param is not of type string', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
                 memoize.fn(function () {}, { salt: true }).then(function () {
                     done(Error('entered resolve handler instead of error handler'));
@@ -111,7 +113,7 @@ describe('memoize-fs |', function () {
             });
 
             it('should throw an errer when cacheId param is not of type string', function (done) {
-                var cachePath = path.join(__dirname, '..', 'testdata', 'cache'),
+                var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = require('../../index.js')({ cachePath: cachePath });
                 memoize.fn(function () {}, { cacheId: true }).then(function () {
                     done(Error('entered resolve handler instead of error handler'));

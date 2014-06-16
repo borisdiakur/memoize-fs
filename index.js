@@ -16,23 +16,17 @@ module.exports = function (options) {
     // check for existing cache folder, if not found, create folder, then resolve
     function initCache(cachePath) {
         return new Promise(function (resolve, reject) {
-            fs.exists(cachePath, function (exists) {
-                if (exists) {
-                    resolve();
+            mkdirp(cachePath, function (err) {
+                if (err) {
+                    reject(err);
                 } else {
-                    mkdirp(cachePath, function (err) {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve();
-                        }
-                    });
+                    resolve();
                 }
             });
         });
     }
 
-    function processFn(fn, opt) {
+    function memoizeFn(fn, opt) {
         if (opt && typeof opt !== 'object') { throw new Error('opt of type object expected, got \'' + typeof opt + '\''); }
 
         var optExt = _.extend({}, opt);
@@ -47,49 +41,84 @@ module.exports = function (options) {
 
         optExt.cacheId = optExt.cacheId || './';
 
-        function getFnHash() {
+        function resolveWithMemFn() {
             return new Promise(function (resolve) {
-                /* jshint unused: vars */
-                var fnJson = JSON.stringify(fn, function (name, value) {
-                        if (typeof value === 'function') {
+                var memFn = function () {
+                    /* jshint unused: vars */
+                    var args = arguments,
+                        fnJson = JSON.stringify(args, function (name, value) {
+                            if (typeof value === 'function') {
+                                return value;
+                            }
                             return value;
+                        }),
+                        salt = optExt.salt || '',
+                        hash = crypto.createHash('md5').update(fnJson + salt).digest('hex'),
+                        filePath = path.join(options.cachePath, optExt.cacheId, hash);
+
+                    fs.readFile(filePath, function (err, data) {
+                        var result,
+                            resultArr,
+                            resultType,
+                            resultStr;
+
+                        function stringifyResult(r) {
+                            if (r && typeof r === 'object') {
+                                return JSON.stringify(r);
+                            } else {
+                                return String(r);
+                            }
                         }
-                        return value;
-                    }),
-                    salt = optExt.salt || '',
-                    hash = crypto.createHash('md5').update(fnJson + salt).digest('hex');
-                resolve(hash);
+
+                        function parseResult(r, t) {
+                            /* jshint maxcomplexity:6 */
+                            if (r === 'null') {
+                                return null;
+                            }
+                            if (r === 'undefined') {
+                                return undefined;
+                            }
+                            if (r === 'NaN') {
+                                return NaN;
+                            }
+                            if (t === 'object') {
+                                return JSON.parse(r);
+                            }
+                            if (t === 'number') {
+                                return Number(r);
+                            }
+                            return r;
+                        }
+
+                        if (err) {
+                            // result has not been cached yet - cache and return it!
+                            result = fn(args);
+                            if (result.then) {
+                                // result is a promise instance
+                                return result.then(function (retObj) {
+                                        fs.writeFile(filePath, typeof retObj + '\n' + stringifyResult(retObj)); // async without callback!
+                                    },
+                                    function (err) {
+                                        // if we have an exception we don't cache anything
+                                        throw err;
+                                    });
+                            }
+                            fs.writeFile(filePath, typeof result + '\n' + resultStr); // async without callback!
+                            return result;
+
+                        } else {
+                            // result has already been cached - return it!
+                            resultArr = data.split('\n');
+                            resultType = _.first(resultArr);
+                            return parseResult(_.rest(resultArr.join('\n')), resultType);
+                        }
+                    });
+                };
+                resolve(memFn);
             });
         }
 
-        function findResult(hash) {
-            return new Promise(function (resolve, reject) {
-                var filePath = path.join(options.cachePath, optExt.cacheId, hash);
-                fs.exists(filePath, function (exists) {
-                    if (exists) {
-                        fs.readFile('/etc/passwd', function (err, data) {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                resolve(data);
-                            }
-                        });
-                    } else {
-                        fn.arguments // TODO: Germany is playing against Portugal at 6pm, so I must go home now. Bye!
-                        mkdirp(cachePath, function (err) {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                resolve();
-                            }
-                        });
-                    }
-                });
-            });
-        }
-
-        return initCache(path.join(options.cachePath, optExt.cacheId))
-            .then(getFnHash).then(findResult);
+        return initCache(path.join(options.cachePath, optExt.cacheId)).then(resolveWithMemFn);
     }
 
     var cache = initCache(options.cachePath);
@@ -97,7 +126,7 @@ module.exports = function (options) {
     return {
         'fn': function (fn, opt) {
             return cache.then(function () {
-                    return processFn(fn, opt);
+                    return memoizeFn(fn, opt);
                 }, function (err) {
                     throw err;
                 });
