@@ -129,10 +129,11 @@ describe('memoize-fs |', function () {
 
             it('should save the result of a memoized function on first execution to its cache folder', function (done) {
                 var cachePath = path.join(__dirname, '../../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath });
-                memoize.fn(function (a, b) { return a + b; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3;
+                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' }).then(function (memFn) {
                     memFn(1, 2).then(function (result) {
-                        assert.strictEqual(result, 3, 'expected exactly one file in cache with id foobar');
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
                         fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                             if (err) {
                                 done(err);
@@ -140,6 +141,35 @@ describe('memoize-fs |', function () {
                                 assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
                                 done();
                             }
+                        });
+                    }, function (err) {
+                        done(err);
+                    });
+                }, function (err) {
+                    done(err);
+                });
+            });
+
+            it('should return the cached result of a previously memoized function', function (done) {
+                var cachePath = path.join(__dirname, '../../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3;
+                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        c = 999;
+                        memFn(1, 2).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, function (err) {
+                            done(err);
                         });
                     }, function (err) {
                         done(err);

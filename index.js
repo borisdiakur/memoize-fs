@@ -57,7 +57,7 @@ module.exports = function (options) {
                             hash = crypto.createHash('md5').update(fnJson + salt).digest('hex'),
                             filePath = path.join(options.cachePath, optExt.cacheId, hash);
 
-                        fs.readFile(filePath, function (err, data) {
+                        fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
                             var result,
                                 resultArr,
                                 resultType,
@@ -118,7 +118,7 @@ module.exports = function (options) {
                                 // result has already been cached - return it!
                                 resultArr = data.split('\n');
                                 resultType = _.first(resultArr);
-                                resolve(parseResult(_.rest(resultArr.join('\n')), resultType));
+                                resolve(parseResult(_.rest(resultArr).join('\n'), resultType));
                             }
                         });
                     });
