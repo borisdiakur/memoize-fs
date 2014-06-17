@@ -88,8 +88,9 @@ module.exports = function (options) {
                                 return r;
                             }
 
-                            if (err) {
-                                // result has not been cached yet - cache and return it!
+                            if (err || optExt.force) {
+                                delete optExt.force;
+                                // result has not been cached yet or needs to be recached - cache and return it!
                                 result = fn.apply(null, args);
                                 if (result && result.then) {
                                     // result is a promise instance
