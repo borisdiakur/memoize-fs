@@ -29,7 +29,7 @@ module.exports = function (options) {
 
     function checkOptions(optExt) {
         if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
-        if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.salt + '\''); }
+        if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.cacheId + '\''); }
     }
 
     function getCacheFilePath(fn, args, opt) {
@@ -136,13 +136,18 @@ module.exports = function (options) {
 
     function invalidateCache(cacheId) {
         return new Promise(function (resolve, reject) {
-            rmdir(path.join(options.cachePath, cacheId), function (err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+            if (cacheId && typeof cacheId !== 'string') {
+                reject(Error('cacheId option of type string expected, got \'' + typeof cacheId + '\''));
+            } else {
+                var cachPath = cacheId ? path.join(options.cachePath, cacheId) : options.cachePath;
+                rmdir(cachPath, function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            }
         });
     }
 
