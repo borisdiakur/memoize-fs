@@ -23,7 +23,7 @@ In your project path:
 ### Usage
 
 ```javascript
-var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../build/cache' }),
+var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' }),
     fun = function (a, b) { return a + b; };
 
 memoize.fn(fun).then(function (memFn) {
@@ -72,6 +72,65 @@ funPromisified(1, 2).then(function (result) {
 memoize.fn(funPromisified).then(...
 ```
 
-### Configuration
+### Options
 
-####TODO: continue with docs here
+When memoizing a function all below options can be applied in any combination.
+
+#### cacheId
+
+By default all cache files are saved into the __root cache__ which is the folder specified by the cachePath option:
+
+```javascript
+var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' });
+```
+
+The cacheId option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
+
+```javascript
+memoize.fn(fun, { cacheId: foobar}).then(...
+```
+
+#### salt
+
+Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the salt option which mutates the hash key created for the memoized function which in turn defines the location of the cache file:
+
+```javascript
+memoize.fn(fun, { salt: 'foobar'}).then(...
+```
+
+#### force
+
+The force option forces the re-execution of an already memoized function and the re-caching of its outcome:
+
+```javascript
+memoize.fn(fun, { force: true}).then(...
+```
+
+### Cache handling
+
+#### Manual clean up:
+
+You can delete the root cache (all cache files inside the folder specified by the cachePath option):
+
+```javascript
+memoized.invalidate().then(...
+```
+
+You can also pass the cacheId argument to the invalidate method. This way you only delete the cache inside the subfolder with given id.
+
+```javascript
+memoized.invalidate('foobar').then(...
+```
+
+## Contributing
+
+Issues and Pull-requests welcome.
+
+## Change Log
+
+v0.0.1 - Alpha
+
+### Tests [![Build Status](https://api.travis-ci.org/borisdiakur/memoize-fs.png?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
+
+	$ npm test
+
