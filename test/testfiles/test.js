@@ -4,15 +4,14 @@
 var assert = require('assert'),
     fs = require('fs'),
     path = require('path'),
-    shell = require('shelljs'),
+    rmdir = require('rimraf'),
     Promise = require('es6-promise').Promise,
     memoizeFs = require('../../index.js');
 
 describe('memoize-fs', function () {
 
     beforeEach(function (done) {
-        shell.rm('-rf', path.join(__dirname, '../../build/cache'));
-        done();
+        rmdir(path.join(__dirname, '../../build/cache'), done);
     });
 
     describe('unit tests', function () {

@@ -5,6 +5,7 @@ var _       = require('lodash'),
     mkdirp  = require('mkdirp'),
     fs      = require('fs'),
     path    = require('path'),
+    rmdir = require('rimraf'),
     crypto  = require('crypto');
 
 module.exports = function (options) {
@@ -26,18 +27,31 @@ module.exports = function (options) {
         });
     }
 
+    function checkOptions(optExt) {
+        if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
+        if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.salt + '\''); }
+    }
+
+    function getCacheFilePath(fn, args, opt) {
+        /* jshint unused: vars */
+        var fnJson = JSON.stringify(args, function (name, value) {
+                if (typeof value === 'function') {
+                    return value;
+                }
+                return value;
+            }),
+            salt = opt.salt || '',
+            hash = crypto.createHash('md5').update(String(fn), fnJson + salt).digest('hex');
+        return path.join(options.cachePath, opt.cacheId, hash);
+    }
+
     function memoizeFn(fn, opt) {
         if (opt && typeof opt !== 'object') { throw new Error('opt of type object expected, got \'' + typeof opt + '\''); }
 
         var optExt = _.extend({}, opt);
 
-        // check args
-        function checkOptions() {
-            if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
-            if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.salt + '\''); }
-        }
         if (typeof fn !== 'function') { throw new Error('fn of type function expected'); }
-        checkOptions();
+        checkOptions(optExt);
 
         optExt.cacheId = optExt.cacheId || './';
 
@@ -47,15 +61,7 @@ module.exports = function (options) {
                     var args = arguments;
                     return new Promise(function (resolve, reject) {
                         /* jshint unused: vars */
-                        var fnJson = JSON.stringify(args, function (name, value) {
-                                if (typeof value === 'function') {
-                                    return value;
-                                }
-                                return value;
-                            }),
-                            salt = optExt.salt || '',
-                            hash = crypto.createHash('md5').update(String(fn), fnJson + salt).digest('hex'),
-                            filePath = path.join(options.cachePath, optExt.cacheId, hash);
+                        var filePath = getCacheFilePath(fn, args, optExt);
 
                         fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
                             var result,
@@ -128,6 +134,18 @@ module.exports = function (options) {
         return initCache(path.join(options.cachePath, optExt.cacheId)).then(resolveWithMemFn);
     }
 
+    function invalidateCache(cacheId) {
+        return new Promise(function (resolve, reject) {
+            rmdir(path.join(options.cachePath, cacheId), function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
     var cache = initCache(options.cachePath);
 
     return {
@@ -137,6 +155,7 @@ module.exports = function (options) {
                 }, function (err) {
                     throw err;
                 });
-        }
+            },
+        'invalidate': invalidateCache
     };
 };
