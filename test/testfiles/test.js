@@ -5,6 +5,7 @@ var assert = require('assert'),
     fs = require('fs'),
     path = require('path'),
     shell = require('shelljs'),
+    Promise = require('es6-promise').Promise,
     memoizeFs = require('../../index.js');
 
 describe('memoize-fs |', function () {
@@ -161,6 +162,41 @@ describe('memoize-fs |', function () {
                         memFn(1, 2).then(function (result) {
                             assert.strictEqual(result, 6, 'expected result to strictly equal 6');
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, function (err) {
+                            done(err);
+                        });
+                    }, function (err) {
+                        done(err);
+                    });
+                }, function (err) {
+                    done(err);
+                });
+            });
+
+            it('should return the cached result of a previously memoized promisified async function', function (done) {
+                var cachePath = path.join(__dirname, '../../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3;
+                memoize.fn(function (a, b) {
+                    return new Promise(function (resolve) {
+                        setTimeout(function () {
+                            resolve(a + b + c);
+                        }, 100);
+                    });
+                }, { cacheId: 'qux' }).then(function (memFn) {
+                    memFn(1, 2).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        c = 999;
+                        memFn(1, 2).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'qux'), function (err, files) {
                                 if (err) {
                                     done(err);
                                 } else {
