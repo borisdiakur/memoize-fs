@@ -58,9 +58,7 @@ describe('memoize-fs', function () {
                         assert.ok(exists, 'expected a cache folder with given path to exist');
                         done();
                     });
-                }, function (err) {
-                    done(err);
-                });
+                }, done);
             });
 
             it('should create a cache folder before caching', function (done) {
@@ -142,12 +140,8 @@ describe('memoize-fs', function () {
                                 done();
                             }
                         });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result of type number of a previously memoized function', function (done) {
@@ -168,15 +162,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result of type string of a previously memoized function', function (done) {
@@ -197,15 +185,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result with the value undefined of a previously memoized function', function (done) {
@@ -226,15 +208,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result with the value null of a previously memoized function', function (done) {
@@ -255,15 +231,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result with the value NaN of a previously memoized function', function (done) {
@@ -284,15 +254,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached truthy result of type object of a previously memoized function', function (done) {
@@ -313,15 +277,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should return the cached result of a previously memoized promisified async function', function (done) {
@@ -348,15 +306,9 @@ describe('memoize-fs', function () {
                                     done();
                                 }
                             });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                        }, done);
+                    }, done);
+                }, done);
             });
         });
 
@@ -381,18 +333,10 @@ describe('memoize-fs', function () {
                                         done();
                                     }
                                 });
-                            }, function (err) {
-                                done(err);
-                            });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                            }, done);
+                        }, done);
+                    }, done);
+                }, done);
             });
 
             it('should recache the result of a memoized function on second execution if force option is set', function (done) {
@@ -414,18 +358,40 @@ describe('memoize-fs', function () {
                                         done();
                                     }
                                 });
-                            }, function (err) {
-                                done(err);
-                            });
-                        }, function (err) {
-                            done(err);
-                        });
-                    }, function (err) {
-                        done(err);
-                    });
-                }, function (err) {
-                    done(err);
-                });
+                            }, done);
+                        }, done);
+                    }, done);
+                }, done);
+            });
+        });
+
+        describe('invalidate cache', function () {
+
+            it('should recache the result of a memoized function after invalidating the cache before the second execution', function (done) {
+                var cachePath = path.join(__dirname, '../../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3;
+                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        memoize.invalidate('foobar').then(function () {
+                            c = 4;
+                            memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' }).then(function (memFn) {
+                                memFn(1, 2).then(function (result) {
+                                    assert.strictEqual(result, 7, 'expected result to strictly equal 7');
+                                    fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                        if (err) {
+                                            done(err);
+                                        } else {
+                                            assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                            done();
+                                        }
+                                    });
+                                }, done);
+                            }, done);
+                        }, done);
+                    }, done);
+                }, done);
             });
         });
     });
