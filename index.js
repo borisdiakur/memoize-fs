@@ -54,7 +54,7 @@ module.exports = function (options) {
                                 return value;
                             }),
                             salt = optExt.salt || '',
-                            hash = crypto.createHash('md5').update(fnJson + salt).digest('hex'),
+                            hash = crypto.createHash('md5').update(String(fn), fnJson + salt).digest('hex'),
                             filePath = path.join(options.cachePath, optExt.cacheId, hash);
 
                         fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
@@ -79,9 +79,6 @@ module.exports = function (options) {
                                 if (r === 'undefined') {
                                     return undefined;
                                 }
-                                if (r === 'NaN') {
-                                    return NaN;
-                                }
                                 if (t === 'object') {
                                     return JSON.parse(r);
                                 }
@@ -94,7 +91,7 @@ module.exports = function (options) {
                             if (err) {
                                 // result has not been cached yet - cache and return it!
                                 result = fn.apply(null, args);
-                                if (result.then) {
+                                if (result && result.then) {
                                     // result is a promise instance
                                     return result.then(function (retObj) {
                                             fs.writeFile(filePath, typeof retObj + '\n' + stringifyResult(retObj)); // async without callback!

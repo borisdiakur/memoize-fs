@@ -8,7 +8,7 @@
     "url": "https://github.com/borisdiakur"
   },
   "scripts": {
-    "test": "mocha test/testfiles"
+    "test": "mocha --reporter nyan test/testfiles"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
   "repository": {
