@@ -5,7 +5,7 @@ var _       = require('lodash'),
     mkdirp  = require('mkdirp'),
     fs      = require('fs'),
     path    = require('path'),
-    rmdir = require('rimraf'),
+    rmdir   = require('rimraf'),
     crypto  = require('crypto');
 
 module.exports = function (options) {
@@ -34,9 +34,18 @@ module.exports = function (options) {
 
     function getCacheFilePath(fn, args, opt) {
         /* jshint unused: vars */
-        var fnJson = JSON.stringify(args, function (name, value) {
+        var circRefColl = [],
+            fnJson = JSON.stringify(args, function (name, value) {
                 if (typeof value === 'function') {
                     return value;
+                }
+                if (typeof value === 'object' && value !== null) {
+                    if (circRefColl.indexOf(value) !== -1) {
+                        // circular reference found, discard key
+                        return;
+                    }
+                    // store value in collection
+                    circRefColl.push(value);
                 }
                 return value;
             }),
