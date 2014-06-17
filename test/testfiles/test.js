@@ -301,7 +301,7 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should return the cached truthy result of type object of a previously memoized function', function (done) {
+            it('should return the cached result of type object of a previously memoized function', function (done) {
                 var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
                     c = 3;
@@ -310,6 +310,30 @@ describe('memoize-fs', function () {
                         assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
                         c = 999;
                         memFn(1, 2).then(function (result) {
+                            assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should return the cached result of type object of a previously memoized function with a circular reference object as function argument', function (done) {
+                var cachePath = path.join(__dirname, '../../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3,
+                    circRefObj = { h: circRefObj };
+                memoize.fn(function (a, b, cro) { return { a: a, b: b, c: c, d : { e: [3, 2, 1], f: null, g: 'qux' } }; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, circRefObj).then(function (result) {
+                        assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
+                        c = 999;
+                        memFn(1, 2, circRefObj).then(function (result) {
                             assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                                 if (err) {
