@@ -144,6 +144,25 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
+            it('should save the result of a memoized function on first execution to its cache folder with salt', function (done) {
+                var cachePath = path.join(__dirname, '../../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3;
+                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', salt: 'qux' }).then(function (memFn) {
+                    memFn(1, 2).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                            if (err) {
+                                done(err);
+                            } else {
+                                assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                done();
+                            }
+                        });
+                    }, done);
+                }, done);
+            });
+
             it('should save the result of a memoized function on first execution to the root cache folder if no cache id is provided', function (done) {
                 var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
