@@ -10,7 +10,7 @@ Memoization is best technique to save on memory or CPU cycles when we deal with 
 
 ### Features
 
-* Works with any type and length of function arguments – __no serialization is needed__
+* Works with almost all kind and any length of function arguments – [__custom serialization is posible__](#serialize)
 * Support for [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
 
@@ -106,9 +106,22 @@ The force option forces the re-execution of an already memoized function and the
 memoize.fn(fun, { force: true}).then(...
 ```
 
-### Cache handling
+#### serialize
 
-#### Manual clean up:
+memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
+If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the serialize option to memoize:
+
+```javascript
+memoize.fn(fun, { serialize: 'foobar'}).then(...
+```
+
+Alternatively you can pass another object to be serialized in place of the arguments of the memoized function:
+
+```javascript
+memoize.fn(fun, { serialize: { foo: 'bar'}}).then(...
+```
+
+### Manual cache invalidation
 
 You can delete the root cache (all cache files inside the folder specified by the cachePath option):
 
@@ -127,6 +140,8 @@ memoized.invalidate('foobar').then(...
 Issues and Pull-requests welcome.
 
 ## Change Log
+
+v0.0.2 - [serialize option](#serialize)
 
 v0.0.1 - Alpha
 
