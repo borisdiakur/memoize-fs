@@ -11,6 +11,9 @@
     "test": "mocha --reporter nyan test/testfiles"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
+  "bugs": {
+    "url": "https://github.com/borisdiakur/memoize-fs/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/borisdiakur/memoize-fs"
@@ -29,5 +32,22 @@
     "mocha": "~1.20.1"
   },
   "private": false,
-  "main": "index.js"
+  "main": "index.js",
+  "keywords": [
+    "memoize",
+    "memoizer",
+    "cache",
+    "memoization",
+    "memo",
+    "memcached",
+    "hashing",
+    "storage",
+    "persistence",
+    "caching",
+    "memory",
+    "file system",
+    "fs"
+  ],
+  "license": "MIT",
+  "readmeFilename": "README.md"
 }

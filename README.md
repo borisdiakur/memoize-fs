@@ -1,26 +1,29 @@
-memoize-fs
-==========
+# memoize-fs
 
-## memoize/cache in file system solution for Node.js
+memoize/cache in file system solution for Node.js
 
-### Motivation
+[![NPM](https://nodei.co/npm/memoize-fs.png)](https://nodei.co/npm/memoize-fs/)
+
+[![Build Status](https://api.travis-ci.org/borisdiakur/memoize-fs.png?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
+
+## Motivation
 This project is inspired by the [memoize project](https://github.com/medikoo/memoize) by [Mariusz Nowak aka medikoo](https://github.com/medikoo).
 The motivation behind this module is that sometimes you have to persist cached function calls but you do not want to deal with an extra process (ie. managing a Redis store).
 Memoization is best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see: http://en.wikipedia.org/wiki/Memoization
 
-### Features
+## Features
 
 * Works with almost all kind and any length of function arguments – [__custom serialization is posible__](#serialize)
 * Support for [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
 
-### Installation
+## Installation
 
 In your project path:
 
 	$ npm install memoize-fs
 
-### Usage
+## Usage
 
 ```javascript
 var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' }),
@@ -137,15 +140,13 @@ memoized.invalidate('foobar').then(...
 
 ## Contributing
 
-Issues and Pull-requests welcome.
+Issues and Pull-requests welcome. If you want to submit a patch, please make sure that you follow this simple rule:
+
+> All code in any code-base should look like a single person typed it, no matter how
+many people contributed. —[idiomatic.js](https://github.com/rwldrn/idiomatic.js/)
 
 ## Change Log
 
 v0.0.2 - [serialize option](#serialize)
 
 v0.0.1 - Alpha
-
-### Tests [![Build Status](https://api.travis-ci.org/borisdiakur/memoize-fs.png?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
-
-	$ npm test
-
