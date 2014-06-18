@@ -40,7 +40,7 @@ memoize.fn(fun).then(function (memFn) {
 }, function (err) { /* handle error */ });
 ```
 
-__Note that a result of a momoised function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
+__Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
 
 ### Memoizing promisified functions
 
@@ -91,12 +91,12 @@ var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname,
 The cacheId option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
 
 ```javascript
-memoize.fn(fun, { cacheId: foobar}).then(...
+memoize.fn(fun, { cacheId: 'foobar'}).then(...
 ```
 
 #### salt
 
-Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the salt option which mutates the hash key created for the memoized function which in turn defines the location of the cache file:
+Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the salt option which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
 ```javascript
 memoize.fn(fun, { salt: 'foobar'}).then(...
