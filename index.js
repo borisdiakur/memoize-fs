@@ -50,7 +50,7 @@ module.exports = function (options) {
                 return value;
             }),
             salt = opt.salt || '',
-            hash = crypto.createHash('md5').update(String(fn), fnJson + salt).digest('hex');
+            hash = crypto.createHash('md5').update(String(fn) + fnJson + salt).digest('hex');
         return path.join(options.cachePath, opt.cacheId, hash);
     }
 
