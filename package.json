@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "mocha --reporter nyan test",
-    "cover": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && rm -rf ./coverage"
+    "cover": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/index.html"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
   "bugs": {
