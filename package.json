@@ -1,6 +1,6 @@
 {
   "name": "memoize-fs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "memoize/cache in file system solution for Node.js",
   "author": {
     "name": "Boris Diakur",
