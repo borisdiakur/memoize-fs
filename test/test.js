@@ -6,7 +6,7 @@ var assert = require('assert'),
     path = require('path'),
     rmdir = require('rimraf'),
     Promise = require('es6-promise').Promise,
-    memoizeFs = require('../../index.js');
+    memoizeFs = require('../index.js');
 
 describe('memoize-fs', function () {
 
