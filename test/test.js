@@ -773,29 +773,6 @@ describe('memoize-fs', function () {
                     done();
                 });
             });
-
-            it('should throw an error trying to initialize cache without having the necessary permission', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = require('../index.js')({ cachePath: cachePath });
-                fs.chmod(cachePath, 0, function(err) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        memoize.fn(function () { return 1; }, { cacheId: 'foobar' }).then(function () {
-                            done(Error('entered resolve handler instead of error handler'));
-                        }, function (err) {
-                            assert.ok(err);
-                            fs.chmod(cachePath, '755', function(err) {
-                                if (err) {
-                                    done(err);
-                                } else {
-                                    done();
-                                }
-                            });
-                        });
-                    }
-                });
-            });
         });
     });
 
