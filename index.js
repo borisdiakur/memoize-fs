@@ -41,7 +41,7 @@ module.exports = function (options) {
                 var circRefColl = [];
                 return JSON.stringify(val, function (name, value) {
                     if (typeof value === 'function') {
-                        return;// value;
+                        return;
                     }
                     if (typeof value === 'object' && value !== null) {
                         if (circRefColl.indexOf(value) !== -1) {
@@ -124,7 +124,11 @@ module.exports = function (options) {
                             if (err || optExt.force) {
                                 delete optExt.force;
                                 // result has not been cached yet or needs to be recached - cache and return it!
-                                result = fn.apply(null, args);
+                                try {
+                                    result = fn.apply(null, args);
+                                } catch (e) {
+                                    return reject(e);
+                                }
                                 if (result && result.then) {
                                     // result is a promise instance
                                     return result.then(function (retObj) {
@@ -185,7 +189,10 @@ module.exports = function (options) {
             return cache.then(function () {
                     return memoizeFn(fn, opt);
                 }, function (err) {
-                    throw err;
+                    /* jshint unused:vars */
+                    return new Promise(function (resolve, reject) {
+                        reject(err);
+                    });
                 });
             },
         'invalidate': invalidateCache
