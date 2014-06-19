@@ -189,10 +189,7 @@ module.exports = function (options) {
             return cache.then(function () {
                     return memoizeFn(fn, opt);
                 }, function (err) {
-                    /* jshint unused:vars */
-                    return new Promise(function (resolve, reject) {
-                        reject(err);
-                    });
+                    throw err;
                 });
             },
         'invalidate': invalidateCache
