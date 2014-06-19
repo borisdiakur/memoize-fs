@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "mocha --reporter nyan test",
-    "cover": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html"
+    "cover": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html",
+    "coveralls": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
   "bugs": {
