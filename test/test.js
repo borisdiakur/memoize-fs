@@ -695,6 +695,17 @@ describe('memoize-fs', function () {
                 });
             });
 
+            it('should throw an error when trying to memoize a function with an invalid combination of cache path and cache id', function (done) {
+                var cachePath = path.join(__dirname, '..'),
+                    memoize = memoizeFs({ cachePath: cachePath });
+                memoize.fn(function () {}, { cacheId: 'README.md' }).then(function (memFn) {
+                    done(Error('entered resolve handler instead of error handler'));
+                }, function (err) {
+                    assert.ok(err);
+                    done();
+                });
+            });
+
             it('should throw an error when trying to memoize a function with options of invalid type', function (done) {
                 var cachePath = path.join(__dirname, '../../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
