@@ -148,6 +148,8 @@ many people contributed. —[idiomatic.js](https://github.com/rwldrn/idiomatic.j
 
 ## Change Log
 
+v0.0.4 - refactoring, error handling, exclude tests in npmignore
+
 v0.0.3 - keywords in package.json, prettified readme, added npmignore
 
 v0.0.2 - [serialize option](#serialize)
