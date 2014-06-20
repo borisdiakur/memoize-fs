@@ -8,8 +8,10 @@
     "url": "https://github.com/borisdiakur"
   },
   "scripts": {
-    "test": "mocha --reporter nyan test",
-    "cover": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html",
+    "test": "mocha test && grunt",
+    "mocha": "mocha --reporter nyan test",
+    "jshint": "grunt",
+    "istanbul": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html",
     "coveralls": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
@@ -34,7 +36,9 @@
     "mocha": "~1.20.1",
     "istanbul": "~0.2.11",
     "coveralls": "~2.10.0",
-    "mocha-lcov-reporter": "0.0.1"
+    "mocha-lcov-reporter": "0.0.1",
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.10.0"
   },
   "private": false,
   "main": "index.js",

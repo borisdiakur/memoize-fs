@@ -142,10 +142,28 @@ memoized.invalidate('foobar').then(...
 
 ## Contributing
 
-Issues and Pull-requests welcome. If you want to submit a patch, please make sure that you follow this simple rule:
+Issues and Pull-requests are absolutely welcome. If you want to submit a patch, please make sure that you follow this simple rule:
 
 > All code in any code-base should look like a single person typed it, no matter how
 many people contributed. — [idiomatic.js](https://github.com/rwldrn/idiomatic.js/)
+
+Lint with:
+```shell
+npm run jshint
+```
+
+Test with:
+```shell
+npm run mocha
+```
+
+Check code coverage with:
+
+```shell
+npm run istanbul
+```
+
+Then commit with a __detailed__ commit message.
 
 ## Change Log
 
