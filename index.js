@@ -25,7 +25,7 @@ module.exports = function (options) {
                 }
             });
         });
-    }asdfasdf
+    }
 
     function checkOptions(optExt) {
         if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
