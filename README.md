@@ -23,7 +23,9 @@ Memoization is best technique to save on memory or CPU cycles when we deal with 
 
 In your project path:
 
-	$ npm install memoize-fs
+```shell
+npm install memoize-fs --save
+```
 
 ## Usage
 
