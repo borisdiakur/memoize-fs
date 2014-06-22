@@ -568,6 +568,64 @@ describe('memoize-fs', function () {
                     }, done);
                 }, done);
             });
+
+            it('should return the cached result of a previously memoized async function with a callback which only excepts an error argument', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = true,
+                    d;
+                memoize.fn(function (a, b, cb) { setTimeout(function () { cb(a && b && c ? null : new Error('qux')); }, 100); }, { cacheId: 'foobar', async: true }).then(function (memFn) {
+                    memFn(true, true, function (err) {
+                        if (err) { d = err; }
+                    }).then(function () {
+                        assert.ifError(d);
+                        d = undefined;
+                        c = false;
+                        memFn(true, true, function (err) {
+                            if (err) { d = err; }
+                        }).then(function () {
+                            assert.ifError(d);
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should return the cached result of a previously memoized async function which only excepts a callback argument', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = true,
+                    d;
+                memoize.fn(function (cb) { setTimeout(function () { cb(c ? null : new Error('qux')); }, 100); }, { cacheId: 'foobar', async: true }).then(function (memFn) {
+                    memFn(function (err) {
+                        if (err) { d = err; }
+                    }).then(function () {
+                        assert.ifError(d);
+                        d = undefined;
+                        c = false;
+                        memFn(function (err) {
+                            if (err) { d = err; }
+                        }).then(function () {
+                            assert.ifError(d);
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
         });
 
         describe('force recaching', function () {
