@@ -41,7 +41,7 @@ module.exports = function (options) {
                 var circRefColl = [];
                 return JSON.stringify(val, function (name, value) {
                     if (typeof value === 'function') {
-                        return;
+                        return; // ignore arguments and attributes of type function silently
                     }
                     if (typeof value === 'object' && value !== null) {
                         if (circRefColl.indexOf(value) !== -1) {

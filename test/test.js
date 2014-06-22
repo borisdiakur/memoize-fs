@@ -468,6 +468,54 @@ describe('memoize-fs', function () {
                     }, done);
                 }, done);
             });
+
+            it('should ignore arguments of type function silently during serialization', function (done) {
+                /* jshint unused:vars */
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    d = 3;
+                memoize.fn(function (a, b, c) { return a + b + d; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, function foo() { return true; }).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        d = 999;
+                        memFn(1, 2, function bar() { return false; }).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should ignore argument attributes of type function silently during serialization', function (done) {
+                /* jshint unused:vars */
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    d = 3;
+                memoize.fn(function (a, b, c) { return a + b + d; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, { foo: function () { return true; } }).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        d = 999;
+                        memFn(1, 2, { bar: function () { return false; } }).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
         });
 
         describe('async', function () {
