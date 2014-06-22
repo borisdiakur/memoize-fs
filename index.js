@@ -27,11 +27,6 @@ module.exports = function (options) {
         });
     }
 
-    function checkOptions(optExt) {
-        if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
-        if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.cacheId + '\''); }
-    }
-
     function getCacheFilePath(fn, args, opt) {
 
         function serialize(val) {
@@ -73,6 +68,12 @@ module.exports = function (options) {
     }
 
     function memoizeFn(fn, opt) {
+
+        function checkOptions(optExt) {
+            if (optExt.salt && typeof optExt.salt !== 'string') { throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\''); }
+            if (optExt.cacheId && typeof optExt.cacheId !== 'string') { throw new Error('cacheId option of type string expected, got \'' + typeof optExt.cacheId + '\''); }
+        }
+
         if (opt && typeof opt !== 'object') { throw new Error('opt of type object expected, got \'' + typeof opt + '\''); }
 
         var optExt = _.extend({}, opt);
@@ -85,7 +86,13 @@ module.exports = function (options) {
         function resolveWithMemFn() {
             return new Promise(function (resolve) {
                 var memFn = function () {
-                    var args = arguments;
+                    var args = arguments,
+                        fnaCb = _.last(args);
+
+                    if (typeof fnaCb === 'function' && fnaCb.length > 0) {
+                        optExt.async = true;
+                    }
+
                     return new Promise(function (resolve, reject) {
                         /* jshint unused: vars */
                         var filePath = getCacheFilePath(fn, args, optExt);
@@ -125,9 +132,6 @@ module.exports = function (options) {
                                     var fnaArgs = _.initial(args),
                                         fnaCb = _.last(args);
 
-                                    if (typeof fnaCb !== 'function') { return reject(Error('expected the last argument of async function to be of type function')); }
-                                    if (fnaCb.length < 1) { return reject(Error('expected callback to expect at least one argument')); }
-
                                     fnaArgs.push(function(/* err, result... */) {
                                         var cbErr = _.first(arguments),
                                             cbArgs = _.rest(arguments);
@@ -148,7 +152,7 @@ module.exports = function (options) {
                                     } catch (e) {
                                         return reject(e);
                                     }
-                                    if (result && result.then) {
+                                    if (result && result.then && typeof result.then === 'function') {
                                         // result is a promise instance
                                         return result.then(function (retObj) {
                                                 fs.writeFile(filePath, typeof retObj + '\n' + stringifyResult(retObj)); // async without callback!

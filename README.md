@@ -16,7 +16,8 @@ Memoization is best technique to save on memory or CPU cycles when we deal with 
 ## Features
 
 * Works with almost all kind and any length of function arguments – [__custom serialization is posible__](#serialize)
-* Support for [__promisified functions__](#memoizing-promisified-functions)
+* Supports memoization of [__asynchronous functions__](#memoizing-asynchronous-functions)
+* Supports memoization of [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
 
 ## Installation
@@ -45,22 +46,35 @@ memoize.fn(fun).then(function (memFn) {
 
 __Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
 
-### Memoizing promisified functions
+### Memoizing asynchronous functions
 
-In order to memoize an async function it must be first promisified in the following manner:
+memoise-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
+So basically you don't have to do anything differently than when memoizing synchronous functions. Just make sure the above condition is fulfilled.
+Here is an example of memoizing a function with a callback:
 
-Before:
 ```javascript
-var funAsync = function (a, b, cb) { setTimeout(function () { cb(null, a + b); }, 100); };
+var funAsync = function (a, b, cb) {
+    setTimeout(function () {
+        cb(null, a + b);
+    }, 100);
+};
 
-// later
-funAsync(1, 2, function (err, result) {
-    if (err) throw err;
-    console.log(result);
-});
+memoize.fn(funAsync).then(function (memFn) {
+    memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }).then(function () {
+        memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }).then(function () { // cache hit
+            // callback is called with previously cached arguments
+        }, function (err) { /* handle error */ });
+    }, function (err) { /* handle error */ });
+}, function (err) { /* handle error */ });
 ```
 
-After:
+### Memoizing promisified functions
+
+You can also memoize a promisified function. memoize-fs assumes a function promisified if its result is _thenable_
+which means that the result is an object with a property `then` of type `function` (read more about JavaScript promises [here](http://www.html5rocks.com/en/tutorials/es6/promises/?redirect_from_locale=de)).
+So again it's the same as with memoizing synchronous functions.
+Here is an example of memoizing a promisified function:
+
 ```javascript
 var funPromisified = function (a, b) {
     return new require('es6-promise').Promise(function (resolve, reject) {
@@ -68,15 +82,14 @@ var funPromisified = function (a, b) {
     });
 };
 
-// later
-funPromisified(1, 2).then(function (result) {
-    console.log(result);
-}, function (err) {
-    throw err;
-});
-
-// now we can memoize it
-memoize.fn(funPromisified).then(...
+memoize.fn(funPromisified).then(function (memFn) {
+    memFn(1, 2).then(function (result) {
+        assert.strictEqual(result, 3);
+        memFn(1, 2).then(function (result) { // cache hit
+            assert.strictEqual(result, 3);
+        }, function (err) { /* handle error */ });
+    }, function (err) { /* handle error */ });
+}, function (err) { /* handle error */ });
 ```
 
 ### Options
@@ -142,6 +155,16 @@ You can also pass the cacheId argument to the invalidate method. This way you on
 memoize.invalidate('foobar').then(...
 ```
 
+## Common pitfalls
+
+- Be carefull when memoizing a function which uses __variables from the outer scope__.
+The value of these variables may change during runtime but the cached result will remain the same
+when calling the memoized function with the same arguments as the first time when the result was cached.
+
+- Be careful when memoizing a function which excepts arguments which are of type `function` or have attributes of type `function`.
+__These arguments will be ignored silently during serialization__.
+To avoid flawy caching please use [__custom serialization__](#serialize).
+
 ## Contributing
 
 Issues and Pull-requests are absolutely welcome. If you want to submit a patch, please make sure that you follow this simple rule:
@@ -165,9 +188,11 @@ Check code coverage with:
 npm run istanbul
 ```
 
-Then commit with a __detailed__ commit message.
+Then please commit with a __detailed__ commit message.
 
-## Change Log
+## Change log
+
+v0.1.0 - memoization of [asynchronous functions](#memoizing-asynchronous-functions)
 
 v0.0.5 - coveralls and mocha-lcov-reporter are dev-dependencies
 
