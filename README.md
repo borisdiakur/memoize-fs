@@ -4,6 +4,7 @@ memoize/cache in file system solution for Node.js
 
 [![Build Status](https://api.travis-ci.org/borisdiakur/memoize-fs.png?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
 [![Coverage Status](https://img.shields.io/coveralls/borisdiakur/memoize-fs.svg)](https://coveralls.io/r/borisdiakur/memoize-fs)
+[![Dependency Status](https://gemnasium.com/borisdiakur/memoize-fs.svg)](https://gemnasium.com/borisdiakur/memoize-fs)
 
 [![NPM](https://nodei.co/npm/memoize-fs.png?downloads=true)](https://nodei.co/npm/memoize-fs/)
 
