@@ -118,7 +118,7 @@ describe('memoize-fs', function () {
                 });
             });
 
-            it('return a rejecting promise instance if cacheId param is not of type string', function (done) {
+            it('should return a rejecting promise instance if cacheId param is not of type string', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
                 memoize.fn(function () {}, { cacheId: true }).then(function () {
@@ -132,7 +132,7 @@ describe('memoize-fs', function () {
 
         describe('process fn', function () {
 
-            it('should not save the result of a memoized function if an exception is raised during execution', function (done) {
+            it('should not cache the result of a memoized function if an exception is raised during execution', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
                 memoize.fn(function () { throw new Error('qux'); }, { cacheId: 'foobar' }).then(function (memFn) {
@@ -152,7 +152,7 @@ describe('memoize-fs', function () {
                 });
             });
 
-            it('should not save the result of a memoized promisified function if an exception is raised during execution', function (done) {
+            it('should not cache the result of a memoized promisified function if an exception is raised during execution', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
                 memoize.fn(function () {
@@ -175,7 +175,7 @@ describe('memoize-fs', function () {
                 });
             });
 
-            it('should save the result of a memoized function on first execution to its cache folder', function (done) {
+            it('should cache the result of a memoized function on first execution to its cache folder', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
                     c = 3;
@@ -194,7 +194,7 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should save the result of a memoized function on first execution to its cache folder with salt', function (done) {
+            it('should cache the result of a memoized function on first execution to its cache folder with salt', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
                     c = 3;
@@ -213,7 +213,7 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should save the result of a memoized function on first execution to the root cache folder if no cache id is provided', function (done) {
+            it('should cache the result of a memoized function on first execution to the root cache folder if no cache id is provided', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
                     c = 3;
@@ -228,6 +228,30 @@ describe('memoize-fs', function () {
                                 done();
                             }
                         });
+                    }, done);
+                }, done);
+            });
+
+            it('should return the cached result with the value undefined of a previously memoized function with return type void', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 0;
+                memoize.fn(function () { ++c; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn().then(function (result) {
+                        assert.strictEqual(c, 1, 'expected variable from outer scope to strictly equal 1');
+                        assert.strictEqual(result, undefined, 'expected result to strictly equal undefined');
+                        memFn().then(function (result) {
+                            assert.strictEqual(c, 1, 'expected variable from outer scope to still strictly equal 1');
+                            assert.strictEqual(result, undefined, 'expected result to strictly equal undefined');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
                     }, done);
                 }, done);
             });
@@ -432,6 +456,176 @@ describe('memoize-fs', function () {
                         c = 999;
                         memFn(1, 2).then(function (result) {
                             assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should ignore arguments of type function silently during serialization', function (done) {
+                /* jshint unused:vars */
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    d = 3;
+                memoize.fn(function (a, b, c) { return a + b + d; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, function foo() { return true; }).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        d = 999;
+                        memFn(1, 2, function bar() { return false; }).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should ignore argument attributes of type function silently during serialization', function (done) {
+                /* jshint unused:vars */
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    d = 3;
+                memoize.fn(function (a, b, c) { return a + b + d; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, { foo: function () { return true; } }).then(function (result) {
+                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                        d = 999;
+                        memFn(1, 2, { bar: function () { return false; } }).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+        });
+
+        describe('async', function () {
+
+            it('should return a rejecting promise instance if option async is provided but function has no callback', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath });
+                memoize.fn(function (a, cb) { cb(a); }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2).then(function () {
+                        done(Error('entered resolve handler instead of error handler'));
+                    }, function (err) {
+                        assert.ok(err);
+                        done();
+                    });
+                }, done);
+            });
+
+            it('should not cache the result of a memoized async function if its callback receives an error', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath });
+                memoize.fn(function (cb) {
+                    setTimeout(function () { cb(new Error('qux')); }, 100);
+                }, { cacheId: 'foobar' }).then(function (memFn) {
+                    /* jshint unused:vars */
+                    memFn(function (err) {}).then(function () {
+                        done(Error('entered resolve handler instead of error handler'));
+                    }, function (err) {
+                        assert.ok(err);
+                        fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                            if (err) {
+                                done(err);
+                            } else {
+                                assert.strictEqual(files.length, 0, 'expected cache with id foobar to be empty');
+                                done();
+                            }
+                        });
+                    });
+                });
+            });
+
+            it('should return the cached result of a previously memoized async function', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = 3,
+                    d;
+                memoize.fn(function (a, b, cb) { setTimeout(function () { cb(null, a + b + c); }, 100); }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, function (err, sum) { if (err) { throw err; } d = sum; }).then(function () {
+                        assert.strictEqual(d, 6, 'expected d to strictly equal 6');
+                        d = undefined;
+                        c = 999;
+                        memFn(1, 2, function (err, sum) { if (err) { throw err; } d = sum; }).then(function () {
+                            assert.strictEqual(d, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should return the cached result of a previously memoized async function with a callback which only excepts an error argument', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = true,
+                    d;
+                memoize.fn(function (a, b, cb) { setTimeout(function () { cb(a && b && c ? null : new Error('qux')); }, 100); }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(true, true, function (err) {
+                        if (err) { d = err; }
+                    }).then(function () {
+                        assert.ifError(d);
+                        d = undefined;
+                        c = false;
+                        memFn(true, true, function (err) {
+                            if (err) { d = err; }
+                        }).then(function () {
+                            assert.ifError(d);
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
+            it('should return the cached result of a previously memoized async function which only excepts a callback argument', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath }),
+                    c = true,
+                    d;
+                memoize.fn(function (cb) { setTimeout(function () { cb(c ? null : new Error('qux')); }, 100); }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(function (err) {
+                        if (err) { d = err; }
+                    }).then(function () {
+                        assert.ifError(d);
+                        d = undefined;
+                        c = false;
+                        memFn(function (err) {
+                            if (err) { d = err; }
+                        }).then(function () {
+                            assert.ifError(d);
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                                 if (err) {
                                     done(err);
