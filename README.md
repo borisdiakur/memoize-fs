@@ -190,19 +190,3 @@ npm run istanbul
 ```
 
 Then please commit with a __detailed__ commit message.
-
-## Change log
-
-v0.1.1 - using [grunt-nsp-package](https://github.com/nodesecurity/grunt-nsp-package) to audit dependencies
-
-v0.1.0 - memoization of [asynchronous functions](#memoizing-asynchronous-functions)
-
-v0.0.5 - coveralls and mocha-lcov-reporter are dev-dependencies
-
-v0.0.4 - refactoring, error handling, exclude tests in npmignore
-
-v0.0.3 - keywords in package.json, prettified readme, added npmignore
-
-v0.0.2 - [serialize option](#serialize)
-
-v0.0.1 - Alpha
