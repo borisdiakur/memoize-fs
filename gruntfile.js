@@ -10,5 +10,8 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.registerTask('default', 'jshint');
+    grunt.loadNpmTasks('grunt-nsp-package');
+    grunt.registerTask('hint', ['jshint']);
+    grunt.registerTask('audit', ['validate-package']);
+    grunt.registerTask('default', ['hint', 'audit']);
 };

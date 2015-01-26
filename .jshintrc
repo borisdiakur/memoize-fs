@@ -39,6 +39,7 @@
         "setInterval": true,
         "clearInterval": true,
         "setImmediate": true,
-        "clearImmediate": true
+        "clearImmediate": true,
+        "Promise": true
     }
 }
