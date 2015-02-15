@@ -132,7 +132,7 @@ module.exports = function (options) {
                                     var fnaArgs = _.initial(args),
                                         fnaCb = _.last(args);
 
-                                    fnaArgs.push(function(/* err, result... */) {
+                                    fnaArgs.push(function (/* err, result... */) {
                                         var cbErr = _.first(arguments),
                                             cbArgs = _.rest(arguments);
                                         if (cbErr) {
