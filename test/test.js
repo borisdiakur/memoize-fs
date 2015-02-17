@@ -68,7 +68,7 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should create a cache folder before caching', function (done) {
+            it('should create a cache sub-folder before caching', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
                 memoize.fn(function () {}, { cacheId: 'foobar' }).then(function (memoized) {
