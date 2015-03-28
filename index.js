@@ -6,9 +6,8 @@ var _          = require('lodash'),
     fs         = require('fs'),
     path       = require('path'),
     rmdir      = require('rimraf'),
-    crypto     = require('crypto'),
     //JSONStream = require('JSONStream'),
-    es         = require('event-stream');
+    crypto     = require('crypto');
 
 module.exports = function (options) {
 
@@ -168,58 +167,57 @@ module.exports = function (options) {
                             return processFn();
                         }
 
+                        var data = '';
+                        stream.on('data', function (chunk) {
+                            data += chunk;
+                        });
                         stream.once('error', function (error) {
                             cacheAndReturn();
                         });
-                        stream.once('readable', function () {
-                            stream.
-                            //pipe(JSONStream.parse()).
-                            pipe(es.mapSync(function (data) {
+                        stream.once('end', function () {
+                            function parseResult(r, t) {
+                                /* jshint maxcomplexity:6 */
+                                if (r === 'null') {
+                                    return null;
+                                }
+                                if (r === 'undefined') {
+                                    return undefined;
+                                }
+                                if (t === 'object') {
+                                    return JSON.parse(r);
+                                }
+                                if (t === 'number') {
+                                    return Number(r);
+                                }
+                                return r;
+                            }
 
-                                function parseResult(r, t) {
-                                    /* jshint maxcomplexity:6 */
-                                    if (r === 'null') {
-                                        return null;
-                                    }
-                                    if (r === 'undefined') {
-                                        return undefined;
-                                    }
-                                    if (t === 'object') {
-                                        return JSON.parse(r);
-                                    }
-                                    if (t === 'number') {
-                                        return Number(r);
-                                    }
-                                    return r;
+                            function retrieveAndReturn() {
+                                var resultArr = data.split('\n');
+
+                                function processFnAsync() {
+                                    var fnaCb = _.last(args);
+                                    resolve(fnaCb.apply(null, parseResult(_.rest(resultArr).join('\n'), _.first(resultArr))));
                                 }
 
-                                function retrieveAndReturn() {
-                                    var resultArr = data.split('\n');
-
-                                    function processFnAsync() {
-                                        var fnaCb = _.last(args);
-                                        resolve(fnaCb.apply(null, parseResult(_.rest(resultArr).join('\n'), _.first(resultArr))));
-                                    }
-
-                                    function processFn() {
-                                        resolve(parseResult(_.rest(resultArr).join('\n'), _.first(resultArr)));
-                                    }
-
-                                    if (optExt.async) {
-                                        return processFnAsync();
-                                    }
-                                    return processFn();
+                                function processFn() {
+                                    resolve(parseResult(_.rest(resultArr).join('\n'), _.first(resultArr)));
                                 }
 
-                                if (optExt.force) {
-                                    delete optExt.force;
-                                    // result has not been cached yet or needs to be recached - cache and return it!
-                                    cacheAndReturn();
-                                } else {
-                                    // result has already been cached - return it!
-                                    retrieveAndReturn();
+                                if (optExt.async) {
+                                    return processFnAsync();
                                 }
-                            }));
+                                return processFn();
+                            }
+
+                            if (optExt.force) {
+                                delete optExt.force;
+                                // result has not been cached yet or needs to be recached - cache and return it!
+                                cacheAndReturn();
+                            } else {
+                                // result has already been cached - return it!
+                                retrieveAndReturn();
+                            }
                         });
                     });
                 };
