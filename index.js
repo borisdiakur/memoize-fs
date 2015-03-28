@@ -100,20 +100,20 @@ module.exports = function (options) {
                         var filePath = getCacheFilePath(fn, args, optExt),
                             stream = fs.createReadStream(filePath, {encoding: 'utf8'});
 
-                        function writeResult(prefix, r, cb) {
-                            var resultString,
-                                writeStream = fs.createWriteStream(filePath);
-                            if (r && typeof r === 'object') {
-                                resultString = JSON.stringify(r);
-                            } else {
-                                resultString = String(r);
-                            }
-                            writeStream.once('error', cb);
-                            writeStream.end(prefix + '\n' + resultString, cb);
-                        }
-
                         function cacheAndReturn() {
                             var result;
+
+                            function writeResult(prefix, r, cb) {
+                                var resultString,
+                                    writeStream = fs.createWriteStream(filePath);
+                                if (r && typeof r === 'object') {
+                                    resultString = JSON.stringify(r);
+                                } else {
+                                    resultString = String(r);
+                                }
+                                writeStream.once('error', cb);
+                                writeStream.end(prefix + '\n' + resultString, cb);
+                            }
 
                             function processFnAsync() {
                                 var fnaArgs = _.initial(args),
