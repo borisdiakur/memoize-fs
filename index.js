@@ -102,16 +102,18 @@ module.exports = function (options) {
                         function cacheAndReturn() {
                             var result;
 
-                            function writeResult(prefix, r, cb) {
+                            function writeResult(r, cb) {
                                 var resultString,
                                     writeStream = fs.createWriteStream(filePath);
                                 if (r && typeof r === 'object') {
                                     resultString = JSON.stringify(r);
+                                } else if (typeof r === 'string') {
+                                    resultString = '"' + r + '"';
                                 } else {
-                                    resultString = String(r);
+                                    resultString = r;
                                 }
                                 writeStream.once('error', cb);
-                                writeStream.end(prefix + '\n' + resultString, cb);
+                                writeStream.end('{"data":' + resultString + '}', cb);
                             }
 
                             function processFnAsync() {
@@ -126,7 +128,7 @@ module.exports = function (options) {
                                         return reject(cbErr);
                                     }
                                     cbArgs.unshift(null);
-                                    writeResult('object', cbArgs, function () {
+                                    writeResult(cbArgs, function () {
                                         resolve(fnaCb.apply(null, cbArgs));
                                     });
                                 });
@@ -142,7 +144,7 @@ module.exports = function (options) {
                                 if (result && result.then && typeof result.then === 'function') {
                                     // result is a promise instance
                                     return result.then(function (retObj) {
-                                            writeResult(typeof retObj, retObj, function () {
+                                            writeResult(retObj, function () {
                                                 resolve(retObj);
                                             });
                                         },
@@ -151,7 +153,7 @@ module.exports = function (options) {
                                             reject(err);
                                         });
                                 } else {
-                                    writeResult(typeof result, result, function (err) {
+                                    writeResult(result, function (err) {
                                         if (err) {
                                             reject(err);
                                         } else {
@@ -175,33 +177,23 @@ module.exports = function (options) {
                             cacheAndReturn();
                         });
                         stream.once('end', function () {
-                            function parseResult(r, t) {
-                                /* jshint maxcomplexity:6 */
-                                if (r === 'null') {
-                                    return null;
-                                }
-                                if (r === 'undefined') {
+                            function parseResult(resultString) {
+                                try {
+                                    return JSON.parse(resultString).data; // will fail on NaN
+                                } catch (e) {
                                     return undefined;
                                 }
-                                if (t === 'object') {
-                                    return JSON.parse(r);
-                                }
-                                if (t === 'number') {
-                                    return Number(r);
-                                }
-                                return r;
                             }
 
                             function retrieveAndReturn() {
-                                var resultArr = data.split('\n');
 
                                 function processFnAsync() {
                                     var fnaCb = _.last(args);
-                                    resolve(fnaCb.apply(null, parseResult(_.rest(resultArr).join('\n'), _.first(resultArr))));
+                                    resolve(fnaCb.apply(null, parseResult(data)));
                                 }
 
                                 function processFn() {
-                                    resolve(parseResult(_.rest(resultArr).join('\n'), _.first(resultArr)));
+                                    resolve(parseResult(data));
                                 }
 
                                 if (optExt.async) {
