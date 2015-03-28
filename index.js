@@ -7,7 +7,7 @@ var _          = require('lodash'),
     path       = require('path'),
     rmdir      = require('rimraf'),
     crypto     = require('crypto'),
-    JSONStream = require('JSONStream'),
+    //JSONStream = require('JSONStream'),
     es         = require('event-stream');
 
 module.exports = function (options) {
@@ -100,17 +100,20 @@ module.exports = function (options) {
                         var filePath = getCacheFilePath(fn, args, optExt),
                             stream = fs.createReadStream(filePath, {encoding: 'utf8'});
 
-                        function stringifyResult(r) {
+                        function writeResult(prefix, r, cb) {
+                            var resultString,
+                                writeStream = fs.createWriteStream(filePath);
                             if (r && typeof r === 'object') {
-                                return JSON.stringify(r);
+                                resultString = JSON.stringify(r);
                             } else {
-                                return String(r);
+                                resultString = String(r);
                             }
+                            writeStream.once('error', cb);
+                            writeStream.end(prefix + '\n' + resultString, cb);
                         }
 
                         function cacheAndReturn() {
-                            var result,
-                                resultStr;
+                            var result;
 
                             function processFnAsync() {
                                 var fnaArgs = _.initial(args),
@@ -124,8 +127,9 @@ module.exports = function (options) {
                                         return reject(cbErr);
                                     }
                                     cbArgs.unshift(null);
-                                    fs.writeFile(filePath, 'object' + '\n' + stringifyResult(cbArgs)); // async without callback!
-                                    resolve(fnaCb.apply(null, cbArgs));
+                                    writeResult('object', cbArgs, function () {
+                                        resolve(fnaCb.apply(null, cbArgs));
+                                    });
                                 });
                                 fn.apply(null, fnaArgs);
                             }
@@ -139,16 +143,16 @@ module.exports = function (options) {
                                 if (result && result.then && typeof result.then === 'function') {
                                     // result is a promise instance
                                     return result.then(function (retObj) {
-                                            fs.writeFile(filePath, typeof retObj + '\n' + stringifyResult(retObj)); // async without callback!
-                                            resolve(retObj);
+                                            writeResult(typeof retObj, retObj, function () {
+                                                resolve(retObj);
+                                            });
                                         },
                                         function (err) {
                                             // if we have an exception we don't cache anything
                                             reject(err);
                                         });
                                 } else {
-                                    resultStr = stringifyResult(result);
-                                    fs.writeFile(filePath, typeof result + '\n' + resultStr, function (err) {
+                                    writeResult(typeof result, result, function (err) {
                                         if (err) {
                                             reject(err);
                                         } else {
@@ -164,10 +168,10 @@ module.exports = function (options) {
                             return processFn();
                         }
 
-                        stream.on('error', function (error) {
+                        stream.once('error', function (error) {
                             cacheAndReturn();
                         });
-                        stream.on('readable', function () {
+                        stream.once('readable', function () {
                             stream.
                             //pipe(JSONStream.parse()).
                             pipe(es.mapSync(function (data) {
