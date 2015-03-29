@@ -24,7 +24,6 @@
     "npm": ">= 1.2.32"
   },
   "dependencies": {
-    "JSONStream": "^0.10.0",
     "es6-promise": "~2.0.1",
     "lodash": "~3.6.0",
     "mkdirp": "~0.5.0",

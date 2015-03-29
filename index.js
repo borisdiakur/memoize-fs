@@ -6,7 +6,6 @@ var _          = require('lodash'),
     fs         = require('fs'),
     path       = require('path'),
     rmdir      = require('rimraf'),
-    //JSONStream = require('JSONStream'),
     crypto     = require('crypto');
 
 module.exports = function (options) {
