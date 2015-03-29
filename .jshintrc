@@ -30,7 +30,6 @@
         "global": false,
         "module": false,
         "require": false,
-        "Promise": true,
         "Buffer": true,
         "exports": true,
         "process": true,
