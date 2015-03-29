@@ -910,7 +910,7 @@ describe('memoize-fs', function () {
                                 done(err);
                             } else {
                                 assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                fs.chmod(path.join(cachePath, 'foobar', files[0]), 0, function(err) {
+                                fs.chmod(path.join(cachePath, 'foobar', files[0]), 0, function (err) {
                                     if (err) {
                                         done(err);
                                     } else {
@@ -935,7 +935,7 @@ describe('memoize-fs', function () {
                     memoize = memoizeFs({ cachePath: cachePath });
                 memoize.fn(function () { return 1; }, { cacheId: 'foobar' }).then(function (memFn) {
                     memFn().then(function () {
-                        fs.chmod(path.join(cachePath, 'foobar'), 0, function(err) {
+                        fs.chmod(path.join(cachePath, 'foobar'), 0, function (err) {
                             if (err) {
                                 done(err);
                             } else {
@@ -943,7 +943,7 @@ describe('memoize-fs', function () {
                                     done(Error('entered resolve handler instead of error handler'));
                                 }, function (err) {
                                     assert.ok(err);
-                                    fs.chmod(path.join(cachePath, 'foobar'), '755', function(err) {
+                                    fs.chmod(path.join(cachePath, 'foobar'), '755', function (err) {
                                         if (err) {
                                             done(err);
                                         } else {
@@ -960,7 +960,7 @@ describe('memoize-fs', function () {
             it('should throw an error when trying to memoize a function with options of invalid type', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath });
-                memoize.fn(function() {}, true).then(function () {
+                memoize.fn(function () {}, true).then(function () {
                     done(Error('entered resolve handler instead of error handler'));
                 }, function (err) {
                     assert.ok(err);
