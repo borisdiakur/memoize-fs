@@ -1,12 +1,12 @@
 'use strict';
 
-var _          = require('lodash'),
-    Promise    = require('es6-promise').Promise,
-    mkdirp     = require('mkdirp'),
-    fs         = require('fs'),
-    path       = require('path'),
-    rmdir      = require('rimraf'),
-    crypto     = require('crypto');
+var _       = require('lodash'),
+    Promise = require('es6-promise').Promise,
+    mkdirp  = require('mkdirp'),
+    fs      = require('fs'),
+    path    = require('path'),
+    rmdir   = require('rimraf'),
+    crypto  = require('crypto');
 
 module.exports = function (options) {
 
@@ -95,15 +95,13 @@ module.exports = function (options) {
 
                     return new Promise(function (resolve, reject) {
                         /* jshint unused: vars */
-                        var filePath = getCacheFilePath(fn, args, optExt),
-                            stream = fs.createReadStream(filePath, {encoding: 'utf8'});
+                        var filePath = getCacheFilePath(fn, args, optExt);
 
                         function cacheAndReturn() {
                             var result;
 
                             function writeResult(r, cb) {
-                                var resultString,
-                                    writeStream = fs.createWriteStream(filePath);
+                                var resultString;
                                 if (r && typeof r === 'object') {
                                     resultString = JSON.stringify(r);
                                 } else if (typeof r === 'string') {
@@ -111,8 +109,7 @@ module.exports = function (options) {
                                 } else {
                                     resultString = r;
                                 }
-                                writeStream.once('error', cb);
-                                writeStream.end('{"data":' + resultString + '}', cb);
+                                fs.writeFile(filePath, '{"data":' + resultString + '}', cb);
                             }
 
                             function processFnAsync() {
@@ -168,14 +165,11 @@ module.exports = function (options) {
                             return processFn();
                         }
 
-                        var data = '';
-                        stream.on('data', function (chunk) {
-                            data += chunk;
-                        });
-                        stream.once('error', function (error) {
-                            cacheAndReturn();
-                        });
-                        stream.once('end', function () {
+                        fs.readFile(filePath, {encoding: 'utf8'}, function (err, data) {
+                            if (err) {
+                                return cacheAndReturn();
+                            }
+
                             function parseResult(resultString) {
                                 try {
                                     return JSON.parse(resultString).data; // will fail on NaN
