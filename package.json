@@ -1,6 +1,6 @@
 {
   "name": "memoize-fs",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "memoize/cache in file system solution for Node.js",
   "author": "Boris Diakur <contact@borisdiakur.com> (https://github.com/borisdiakur)",
   "scripts": {
@@ -24,9 +24,9 @@
     "npm": ">= 1.2.32"
   },
   "dependencies": {
-    "es6-promise": "~2.0.1",
+    "es6-promise": "^2.1.0",
     "mkdirp": "~0.5.0",
-    "lodash": "~3.5.0",
+    "lodash": "^3.7.0",
     "rimraf": "~2.3.0"
   },
   "devDependencies": {
