@@ -97,99 +97,96 @@ module.exports = function (options) {
                         /* jshint unused: vars */
                         var filePath = getCacheFilePath(fn, args, optExt);
 
-                        fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
+                        function cacheAndReturn() {
+                            var result;
 
-                            function stringifyResult(r) {
+                            function writeResult(r, cb) {
+                                var resultString;
                                 if (r && typeof r === 'object') {
-                                    return JSON.stringify(r);
+                                    resultString = JSON.stringify(r);
+                                } else if (typeof r === 'string') {
+                                    resultString = '"' + r + '"';
                                 } else {
-                                    return String(r);
+                                    resultString = r;
                                 }
+                                fs.writeFile(filePath, '{"data":' + resultString + '}', cb);
                             }
 
-                            function parseResult(r, t) {
-                                /* jshint maxcomplexity:6 */
-                                if (r === 'null') {
-                                    return null;
-                                }
-                                if (r === 'undefined') {
-                                    return undefined;
-                                }
-                                if (t === 'object') {
-                                    return JSON.parse(r);
-                                }
-                                if (t === 'number') {
-                                    return Number(r);
-                                }
-                                return r;
-                            }
+                            function processFnAsync() {
+                                var fnaArgs = _.initial(args),
+                                    fnaCb = _.last(args);
 
-                            function cacheAndReturn() {
-                                var result,
-                                    resultStr;
-
-                                function processFnAsync() {
-                                    var fnaArgs = _.initial(args),
-                                        fnaCb = _.last(args);
-
-                                    fnaArgs.push(function (/* err, result... */) {
-                                        var cbErr = _.first(arguments),
-                                            cbArgs = _.rest(arguments);
-                                        if (cbErr) {
-                                            // if we have an exception we don't cache anything
-                                            return reject(cbErr);
-                                        }
-                                        cbArgs.unshift(null);
-                                        fs.writeFile(filePath, 'object' + '\n' + stringifyResult(cbArgs)); // async without callback!
+                                fnaArgs.push(function (/* err, result... */) {
+                                    var cbErr = _.first(arguments),
+                                        cbArgs = _.rest(arguments);
+                                    if (cbErr) {
+                                        // if we have an exception we don't cache anything
+                                        return reject(cbErr);
+                                    }
+                                    cbArgs.unshift(null);
+                                    writeResult(cbArgs, function () {
                                         resolve(fnaCb.apply(null, cbArgs));
                                     });
-                                    fn.apply(null, fnaArgs);
-                                }
+                                });
+                                fn.apply(null, fnaArgs);
+                            }
 
-                                function processFn() {
-                                    try {
-                                        result = fn.apply(null, args);
-                                    } catch (e) {
-                                        return reject(e);
-                                    }
-                                    if (result && result.then && typeof result.then === 'function') {
-                                        // result is a promise instance
-                                        return result.then(function (retObj) {
-                                                fs.writeFile(filePath, typeof retObj + '\n' + stringifyResult(retObj)); // async without callback!
+                            function processFn() {
+                                try {
+                                    result = fn.apply(null, args);
+                                } catch (e) {
+                                    return reject(e);
+                                }
+                                if (result && result.then && typeof result.then === 'function') {
+                                    // result is a promise instance
+                                    return result.then(function (retObj) {
+                                            writeResult(retObj, function () {
                                                 resolve(retObj);
-                                            },
-                                            function (err) {
-                                                // if we have an exception we don't cache anything
-                                                reject(err);
                                             });
-                                    } else {
-                                        resultStr = stringifyResult(result);
-                                        fs.writeFile(filePath, typeof result + '\n' + resultStr, function (err) {
-                                            if (err) {
-                                                reject(err);
-                                            } else {
-                                                resolve(result);
-                                            }
+                                        },
+                                        function (err) {
+                                            // if we have an exception we don't cache anything
+                                            reject(err);
                                         });
-                                    }
+                                } else {
+                                    writeResult(result, function (err) {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolve(result);
+                                        }
+                                    });
                                 }
+                            }
 
-                                if (optExt.async) {
-                                    return processFnAsync();
+                            if (optExt.async) {
+                                return processFnAsync();
+                            }
+                            return processFn();
+                        }
+
+                        fs.readFile(filePath, {encoding: 'utf8'}, function (err, data) {
+                            if (err) {
+                                return cacheAndReturn();
+                            }
+
+                            function parseResult(resultString) {
+                                try {
+                                    return JSON.parse(resultString).data; // will fail on NaN
+                                } catch (e) {
+                                    return undefined;
                                 }
-                                return processFn();
                             }
 
                             function retrieveAndReturn() {
-                                var resultArr = data.split('\n');
 
                                 function processFnAsync() {
                                     var fnaCb = _.last(args);
-                                    resolve(fnaCb.apply(null, parseResult(_.rest(resultArr).join('\n'), _.first(resultArr))));
+                                    resolve(fnaCb.apply(null, parseResult(data)));
                                 }
 
                                 function processFn() {
-                                    resolve(parseResult(_.rest(resultArr).join('\n'), _.first(resultArr)));
+                                    resolve(parseResult(data));
                                 }
 
                                 if (optExt.async) {
@@ -198,7 +195,7 @@ module.exports = function (options) {
                                 return processFn();
                             }
 
-                            if (err || optExt.force) {
+                            if (optExt.force) {
                                 delete optExt.force;
                                 // result has not been cached yet or needs to be recached - cache and return it!
                                 cacheAndReturn();
