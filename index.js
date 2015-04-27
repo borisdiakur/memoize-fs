@@ -101,15 +101,15 @@ module.exports = function (options) {
                             var result;
 
                             function writeResult(r, cb) {
-                                var resultString;
-                                if (r && typeof r === 'object') {
-                                    resultString = JSON.stringify(r);
-                                } else if (typeof r === 'string') {
-                                    resultString = '"' + r + '"';
+                                var resultObj,
+                                    resultString;
+                                if ((r && typeof r === 'object') || typeof r === 'string') {
+                                    resultObj = {data: r};
+                                    resultString = JSON.stringify(resultObj);
                                 } else {
-                                    resultString = r;
+                                    resultString = '{"data":' + r + '}';
                                 }
-                                fs.writeFile(filePath, '{"data":' + resultString + '}', cb);
+                                fs.writeFile(filePath, resultString, cb);
                             }
 
                             function processFnAsync() {

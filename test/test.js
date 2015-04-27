@@ -325,6 +325,27 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
+            it('should return the cached result of type string with lots of quotation marks in it of a previously memoized function', function (done) {
+                var cachePath = path.join(__dirname, '../build/cache'),
+                    memoize = memoizeFs({ cachePath: cachePath });
+                memoize.fn(function (a, b) { return '"{"foo": "bar", "qux": "\'sas\'\"quatch\""}"' + (a + b); }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2).then(function (result) {
+                        assert.strictEqual(result, '"{"foo": "bar", "qux": "\'sas\'\"quatch\""}"3', 'expected result to strictly equal "{"foo": "bar", "qux": "\'sas\'\"quatch\""}"3');
+                        memFn(1, 2).then(function (result) {
+                            assert.strictEqual(result, '"{"foo": "bar", "qux": "\'sas\'\"quatch\""}"3', 'expected result to strictly equal "{"foo": "bar", "qux": "\'sas\'\"quatch\""}"3');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
+                        }, done);
+                    }, done);
+                }, done);
+            });
+
             it('should return the cached result with the value undefined of a previously memoized function', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
