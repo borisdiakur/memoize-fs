@@ -348,29 +348,6 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should return the cached result with the value undefined of a previously memoized function', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c;
-                memoize.fn(function (a, b) { return a || b || c; }, { cacheId: 'foobar' }).then(function (memFn) {
-                    memFn(undefined, undefined).then(function (result) {
-                        assert.strictEqual(result, undefined, 'expected result to strictly equal undefined');
-                        c = true;
-                        memFn(undefined, undefined).then(function (result) {
-                            assert.strictEqual(result, undefined, 'expected result to strictly equal undefined');
-                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                                if (err) {
-                                    done(err);
-                                } else {
-                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                    done();
-                                }
-                            });
-                        }, done);
-                    }, done);
-                }, done);
-            });
-
             it('should return the cached result with the value null of a previously memoized function', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
