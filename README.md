@@ -105,7 +105,7 @@ By default all cache files are saved into the __root cache__ which is the folder
 var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' });
 ```
 
-The cacheId option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
+The `cacheId` option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
 
 ```javascript
 memoize.fn(fun, { cacheId: 'foobar'}).then(...
@@ -113,7 +113,7 @@ memoize.fn(fun, { cacheId: 'foobar'}).then(...
 
 #### salt
 
-Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the salt option which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
+Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the `salt` option which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
 ```javascript
 memoize.fn(fun, { salt: 'foobar'}).then(...
@@ -121,7 +121,7 @@ memoize.fn(fun, { salt: 'foobar'}).then(...
 
 #### force
 
-The force option forces the re-execution of an already memoized function and the re-caching of its outcome:
+The `force` option forces the re-execution of an already memoized function and the re-caching of its outcome:
 
 ```javascript
 memoize.fn(fun, { force: true}).then(...
@@ -130,7 +130,8 @@ memoize.fn(fun, { force: true}).then(...
 #### serialize
 
 memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
-If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the serialize option to memoize:
+The hash is created from the serialized arguments, the function body and the [salt](https://github.com/borisdiakur/memoize-fs#salt) (if provided as an option).
+If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the `serialize` option to memoize-fs:
 
 ```javascript
 memoize.fn(fun, { serialize: 'foobar'}).then(...
@@ -141,6 +142,11 @@ Alternatively you can pass another object to be serialized in place of the argum
 ```javascript
 memoize.fn(fun, { serialize: { foo: 'bar'}}).then(...
 ```
+
+#### noBody
+
+The hash is created from the serialized arguments, the function body and the [salt](https://github.com/borisdiakur/memoize-fs#salt) (if provided as an option).
+If for some reason you want to omit the function body when generating the hash, set the option `noBody` to `true`.
 
 ### Manual cache invalidation
 

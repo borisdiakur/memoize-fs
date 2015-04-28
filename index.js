@@ -53,7 +53,7 @@ module.exports = function (options) {
         }
 
         var salt = opt.salt || '',
-            fnStr = String(fn),
+            fnStr = (opt.noBody ? '' : String(fn)),
             argsStr,
             hash;
 
