@@ -32,7 +32,8 @@ npm install memoize-fs --save
 ## Usage
 
 ```javascript
-var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' }),
+var cachePath = require('path').join(__dirname, '..', 'cache'),
+    memoize = require('memoize-fs')({ cachePath: cachePath }),
     fun = function (a, b) { return a + b; };
 
 memoize.fn(fun).then(function (memFn) {
@@ -50,17 +51,18 @@ __Note that a result of a momoized function is always a [Promise](http://www.htm
 Here is a similar and slightly more readable example in a promise variable notation:
 
 ```javascript
-var cachePath = require('path').join(__dirname, '../build/cache'),
-    memoize = require('memoize-fs')({ cachePath: cachePath });
+var cachePath = require('path').join(__dirname, '..', 'cache'),
+    memoize = require('memoize-fs')({ cachePath: cachePath }),
+    fun = function (a, b) { return a + b; };
 
-var memFnPromise = memoize.fn(function (a, b) { return a + b; }, { cacheId: 'foobar' });
+var memFnPromise = memoize.fn(fun);
 
 var resultPromise = memFnPromise.then(function (memFn) {
     return memFn(1, 2);
 });
 
 resultPromise.then(function (result) {
-    assert.strictEqual(result, 3, 'expected result to strictly equal 3');
+    assert.strictEqual(result, 3);
 });
 
 resultPromise.then(null, function (err) { /* handle error */ });
