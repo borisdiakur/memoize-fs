@@ -81,6 +81,17 @@ describe('memoize-fs', function () {
                     done(err);
                 });
             });
+
+            it('should reject with invalid cache path', function (done) {
+                var cachePath = '/öäüß',
+                    memoize = memoizeFs({ cachePath: cachePath });
+                memoize.fn(function () {}, { cacheId: 'foobar' }).then(function () {
+                    done(new Error('entered resolve handler instead of error handler'));
+                }, function (err) {
+                    assert.ok(err);
+                    done();
+                });
+            });
         });
 
         describe('memoize fn', function () {
