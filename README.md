@@ -47,6 +47,26 @@ memoize.fn(fun).then(function (memFn) {
 
 __Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
 
+Here is a similar and slightly more readable example in a promise variable notation:
+
+```javascript
+var cachePath = path.join(__dirname, '../build/cache'),
+    memoize = memoizeFs({ cachePath: cachePath }),
+    c = 3;
+
+var memFnPromise = memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' });
+
+var resultPromise = memFnPromise.then(function (memFn) {
+    return memFn(1, 2);
+});
+
+resultPromise.then(function (result) {
+    assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+});
+
+resultPromise.then(null, function (err) { /* handle error */ });
+```
+
 ### Memoizing asynchronous functions
 
 memoise-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
@@ -108,7 +128,7 @@ var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname,
 The `cacheId` option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
 
 ```javascript
-memoize.fn(fun, { cacheId: 'foobar'}).then(...
+memoize.fn(fun, { cacheId: 'foobar' }).then(...
 ```
 
 #### salt
@@ -116,7 +136,7 @@ memoize.fn(fun, { cacheId: 'foobar'}).then(...
 Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the `salt` option which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
 ```javascript
-memoize.fn(fun, { salt: 'foobar'}).then(...
+memoize.fn(fun, { salt: 'foobar' }).then(...
 ```
 
 #### force
@@ -124,7 +144,7 @@ memoize.fn(fun, { salt: 'foobar'}).then(...
 The `force` option forces the re-execution of an already memoized function and the re-caching of its outcome:
 
 ```javascript
-memoize.fn(fun, { force: true}).then(...
+memoize.fn(fun, { force: true }).then(...
 ```
 
 #### serialize
@@ -134,19 +154,23 @@ The hash is created from the serialized arguments, the function body and the [sa
 If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the `serialize` option to memoize-fs:
 
 ```javascript
-memoize.fn(fun, { serialize: 'foobar'}).then(...
+memoize.fn(fun, { serialize: 'foobar' }).then(...
 ```
 
 Alternatively you can pass another object to be serialized in place of the arguments of the memoized function:
 
 ```javascript
-memoize.fn(fun, { serialize: { foo: 'bar'}}).then(...
+memoize.fn(fun, { serialize: { foo: 'bar' }}).then(...
 ```
 
 #### noBody
 
 The hash is created from the serialized arguments, the function body and the [salt](https://github.com/borisdiakur/memoize-fs#salt) (if provided as an option).
 If for some reason you want to omit the function body when generating the hash, set the option `noBody` to `true`.
+
+```javascript
+memoize.fn(fun, { serialize: 'foobar', noBody: true }).then(...
+```
 
 ### Manual cache invalidation
 
