@@ -131,7 +131,7 @@ memoize.fn(fun, { force: true }).then(...
 #### serialize
 
 memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
-The hash is created from the serialized arguments, the function body and the [salt](https://github.com/borisdiakur/memoize-fs#salt) (if provided as an option).
+The hash is created from the serialized arguments, the function body and the [salt](#salt) (if provided as an option).
 If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the `serialize` option to memoize-fs:
 
 ```javascript
@@ -146,11 +146,10 @@ memoize.fn(fun, { serialize: { foo: 'bar' }}).then(...
 
 #### noBody
 
-The hash is created from the serialized arguments, the function body and the [salt](https://github.com/borisdiakur/memoize-fs#salt) (if provided as an option).
-If for some reason you want to omit the function body when generating the hash, set the option `noBody` to `true`.
+If for some reason you want to omit the function body when [generating the hash](#serialize), set the option `noBody` to `true`.
 
 ```javascript
-memoize.fn(fun, { serialize: 'foobar', noBody: true }).then(...
+memoize.fn(fun, { noBody: true }).then(...
 ```
 
 ### Manual cache invalidation
