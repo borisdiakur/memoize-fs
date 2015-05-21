@@ -437,12 +437,17 @@ describe('memoize-fs', function () {
             it('should return the cached result of type object of a previously memoized function', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3;
-                memoize.fn(function (a, b) { return { a: a, b: b, c: c, d : { e: [3, 2, 1], f: null, g: 'qux' } }; }, { cacheId: 'foobar' }).then(function (memFn) {
-                    memFn(1, 2).then(function (result) {
+                    c = 3,
+                    Circ = function () {
+                      this.abc = 'Hello';
+                      this.circular = this;
+                    };
+                /* jshint unused: vars */
+                memoize.fn(function (a, b, circ) { return { a: a, b: b, c: c, d : { e: [3, 2, 1], f: null, g: 'qux' } }; }, { cacheId: 'foobar' }).then(function (memFn) {
+                    memFn(1, 2, new Circ()).then(function (result) {
                         assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
                         c = 999;
-                        memFn(1, 2).then(function (result) {
+                        memFn(1, 2, new Circ()).then(function (result) {
                             assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                                 if (err) {
@@ -700,108 +705,6 @@ describe('memoize-fs', function () {
                                         done(err);
                                     } else {
                                         assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                        done();
-                                    }
-                                });
-                            }, done);
-                        }, done);
-                    }, done);
-                }, done);
-            });
-        });
-
-        describe('custom serialization', function () {
-
-            it('should cache the result of a memoized function on second execution with option serialize of type string', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3;
-                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', serialize: 'qux' }).then(function (memFn) {
-                    memFn(1, 2).then(function (result) {
-                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        c = 999;
-                        memFn(1, 2).then(function (result) {
-                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                                if (err) {
-                                    done(err);
-                                } else {
-                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                    done();
-                                }
-                            });
-                        }, done);
-                    }, done);
-                }, done);
-            });
-
-            it('should cache the result of a memoized function on second execution with option serialize with the value null', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3;
-                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', serialize: null }).then(function (memFn) {
-                    memFn(1, 2).then(function (result) {
-                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        c = 999;
-                        memFn(1, 2).then(function (result) {
-                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                                if (err) {
-                                    done(err);
-                                } else {
-                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                    done();
-                                }
-                            });
-                        }, done);
-                    }, done);
-                }, done);
-            });
-
-            it('should cache the result of a memoized function on second execution with option serialize of type object', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3,
-                    Circ = function () {
-                      this.abc = 'Hello';
-                      this.circular = this;
-                    },
-                    serializeObj = {qux: 321, circular: new Circ(), fun: function () {}};
-                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', serialize: serializeObj }).then(function (memFn) {
-                    memFn(1, 2).then(function (result) {
-                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        c = 999;
-                        memFn(1, 2).then(function (result) {
-                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                                if (err) {
-                                    done(err);
-                                } else {
-                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                    done();
-                                }
-                            });
-                        }, done);
-                    }, done);
-                }, done);
-            });
-
-            it('should cache the results of two equal memoized functions with different options serialize set', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3;
-                memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', serialize: {qux: 321} }).then(function (memFn) {
-                    memFn(1, 2).then(function (result) {
-                        assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', serialize: {qux: 123} }).then(function (memFn) {
-                            c = 4;
-                            memFn(1, 2).then(function (result) {
-                                assert.strictEqual(result, 7, 'expected result to strictly equal 6');
-                                fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                                    if (err) {
-                                        done(err);
-                                    } else {
-                                        assert.strictEqual(files.length, 2, 'expected exactly two files in cache with id foobar');
                                         done();
                                     }
                                 });

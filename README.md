@@ -16,7 +16,7 @@ Memoization is best technique to save on memory or CPU cycles when we deal with 
 
 ## Features
 
-* Works with almost all kind and any length of function arguments – [__custom serialization is posible__](#serialize)
+* Works with almost all kind and any length of function arguments ([__serialization__](#serialization) is handled under the hood)
 * Supports memoization of [__asynchronous functions__](#memoizing-asynchronous-functions)
 * Supports memoization of [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
@@ -128,25 +128,9 @@ The `force` option forces the re-execution of an already memoized function and t
 memoize.fn(fun, { force: true }).then(...
 ```
 
-#### serialize
-
-memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
-The hash is created from the serialized arguments, the function body and the [salt](#salt) (if provided as an option).
-If you want memoize-fs to use a custom key instead of letting it serialize the arguments, you can pass the key in the `serialize` option to memoize-fs:
-
-```javascript
-memoize.fn(fun, { serialize: 'foobar' }).then(...
-```
-
-Alternatively you can pass another object to be serialized in place of the arguments of the memoized function:
-
-```javascript
-memoize.fn(fun, { serialize: { foo: 'bar' }}).then(...
-```
-
 #### noBody
 
-If for some reason you want to omit the function body when [generating the hash](#serialize), set the option `noBody` to `true`.
+If for some reason you want to omit the function body when generating the hash ([see serialization](#serialization)), set the option `noBody` to `true`.
 
 ```javascript
 memoize.fn(fun, { noBody: true }).then(...
@@ -166,6 +150,12 @@ You can also pass the cacheId argument to the invalidate method. This way you on
 memoize.invalidate('foobar').then(...
 ```
 
+## Serialization
+
+memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
+The hash is created from the serialized arguments, the function body and the [salt](#salt) (if provided as an option).
+__Note that memoize-fs serializes arguments using JSON. While it checks for circular references, it ignores arguments and attributes of type function silently.__
+
 ## Common pitfalls
 
 - Be carefull when memoizing a function which uses __variables from the outer scope__.
@@ -174,7 +164,6 @@ when calling the memoized function with the same arguments as the first time whe
 
 - Be careful when memoizing a function which excepts arguments which are of type `function` or have attributes of type `function`.
 __These arguments will be ignored silently during serialization__.
-To avoid flawy caching please use [__custom serialization__](#serialize).
 
 ## Contributing
 

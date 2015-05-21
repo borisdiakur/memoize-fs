@@ -29,27 +29,23 @@ module.exports = function (options) {
 
     function getCacheFilePath(fn, args, opt) {
 
-        function serialize(val) {
-            if (!val) { return String(val); }
-            if (typeof val === 'object') {
-                /* jshint unused: vars */
-                var circRefColl = [];
-                return JSON.stringify(val, function (name, value) {
-                    if (typeof value === 'function') {
-                        return; // ignore arguments and attributes of type function silently
+        function serialize() {
+            /* jshint unused: vars */
+            var circRefColl = [];
+            return JSON.stringify(args, function (name, value) {
+                if (typeof value === 'function') {
+                    return; // ignore arguments and attributes of type function silently
+                }
+                if (typeof value === 'object' && value !== null) {
+                    if (circRefColl.indexOf(value) !== -1) {
+                        // circular reference found, discard key
+                        return;
                     }
-                    if (typeof value === 'object' && value !== null) {
-                        if (circRefColl.indexOf(value) !== -1) {
-                            // circular reference found, discard key
-                            return;
-                        }
-                        // store value in collection
-                        circRefColl.push(value);
-                    }
-                    return value;
-                });
-            }
-            return String(val);
+                    // store value in collection
+                    circRefColl.push(value);
+                }
+                return value;
+            });
         }
 
         var salt = opt.salt || '',
@@ -57,11 +53,7 @@ module.exports = function (options) {
             argsStr,
             hash;
 
-        if (opt.serialize !== undefined) {
-            argsStr = serialize(opt.serialize);
-        } else {
-            argsStr = serialize(args);
-        }
+        argsStr = serialize(args);
 
         hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex');
         return path.join(options.cachePath, opt.cacheId, hash);
