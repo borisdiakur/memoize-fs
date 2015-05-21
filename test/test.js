@@ -193,42 +193,20 @@ describe('memoize-fs', function () {
                 memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' }).then(function (memFn) {
                     memFn(1, 2).then(function (result) {
                         assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                            if (err) {
-                                done(err);
-                            } else {
-                                assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                done();
-                            }
+                        c = 999;
+                        memFn(1, 2).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
                         });
                     }, done);
                 }, done);
-            });
-
-            it('should cache the result of a memoized function on first execution to its cache folder (promise variables notation)', function (done) {
-                var cachePath = path.join(__dirname, '../build/cache'),
-                    memoize = memoizeFs({ cachePath: cachePath }),
-                    c = 3;
-
-                var memFnPromise = memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' });
-
-                var resultPromise = memFnPromise.then(function (memFn) {
-                    return memFn(1, 2);
-                });
-
-                resultPromise.then(function (result) {
-                    assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                    fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                        if (err) {
-                            done(err);
-                        } else {
-                            assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                            done();
-                        }
-                    });
-                });
-
-                resultPromise.then(null, done);
             });
 
             it('should cache the result of a memoized function on first execution to its cache folder with salt', function (done) {
@@ -238,13 +216,17 @@ describe('memoize-fs', function () {
                 memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar', salt: 'qux' }).then(function (memFn) {
                     memFn(1, 2).then(function (result) {
                         assert.strictEqual(result, 6, 'expected result to strictly equal 6');
-                        fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-                            if (err) {
-                                done(err);
-                            } else {
-                                assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
-                                done();
-                            }
+                        c = 999;
+                        memFn(1, 2).then(function (result) {
+                            assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+                            fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar');
+                                    done();
+                                }
+                            });
                         });
                     }, done);
                 }, done);
