@@ -48,26 +48,6 @@ memoize.fn(fun).then(function (memFn) {
 
 __Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
 
-Here is a similar and slightly more readable example in a promise variable notation:
-
-```javascript
-var cachePath = require('path').join(__dirname, '..', 'cache'),
-    memoize = require('memoize-fs')({ cachePath: cachePath }),
-    fun = function (a, b) { return a + b; };
-
-var memFnPromise = memoize.fn(fun);
-
-var resultPromise = memFnPromise.then(function (memFn) {
-    return memFn(1, 2);
-});
-
-resultPromise.then(function (result) {
-    assert.strictEqual(result, 3);
-});
-
-resultPromise.then(null, function (err) { /* handle error */ });
-```
-
 ### Memoizing asynchronous functions
 
 memoise-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
