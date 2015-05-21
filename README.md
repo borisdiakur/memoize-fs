@@ -50,18 +50,17 @@ __Note that a result of a momoized function is always a [Promise](http://www.htm
 Here is a similar and slightly more readable example in a promise variable notation:
 
 ```javascript
-var cachePath = path.join(__dirname, '../build/cache'),
-    memoize = memoizeFs({ cachePath: cachePath }),
-    c = 3;
+var cachePath = require('path').join(__dirname, '../build/cache'),
+    memoize = require('memoize-fs')({ cachePath: cachePath });
 
-var memFnPromise = memoize.fn(function (a, b) { return a + b + c; }, { cacheId: 'foobar' });
+var memFnPromise = memoize.fn(function (a, b) { return a + b; }, { cacheId: 'foobar' });
 
 var resultPromise = memFnPromise.then(function (memFn) {
     return memFn(1, 2);
 });
 
 resultPromise.then(function (result) {
-    assert.strictEqual(result, 6, 'expected result to strictly equal 6');
+    assert.strictEqual(result, 3, 'expected result to strictly equal 3');
 });
 
 resultPromise.then(null, function (err) { /* handle error */ });
