@@ -27,26 +27,26 @@ module.exports = function (options) {
         });
     }
 
-    function getCacheFilePath(fn, args, opt) {
+    function serialize(val) {
+        /* jshint unused: vars */
+        var circRefColl = [];
+        return JSON.stringify(val, function (name, value) {
+            if (typeof value === 'function') {
+                return; // ignore arguments and attributes of type function silently
+            }
+            if (typeof value === 'object' && value !== null) {
+                if (circRefColl.indexOf(value) !== -1) {
+                    // circular reference found, discard key
+                    return;
+                }
+                // store value in collection
+                circRefColl.push(value);
+            }
+            return value;
+        });
+    }
 
-        function serialize() {
-            /* jshint unused: vars */
-            var circRefColl = [];
-            return JSON.stringify(args, function (name, value) {
-                if (typeof value === 'function') {
-                    return; // ignore arguments and attributes of type function silently
-                }
-                if (typeof value === 'object' && value !== null) {
-                    if (circRefColl.indexOf(value) !== -1) {
-                        // circular reference found, discard key
-                        return;
-                    }
-                    // store value in collection
-                    circRefColl.push(value);
-                }
-                return value;
-            });
-        }
+    function getCacheFilePath(fn, args, opt) {
 
         var salt = opt.salt || '',
             fnStr = (opt.noBody ? '' : String(fn)),
@@ -97,7 +97,7 @@ module.exports = function (options) {
                                     resultString;
                                 if ((r && typeof r === 'object') || typeof r === 'string') {
                                     resultObj = {data: r};
-                                    resultString = JSON.stringify(resultObj);
+                                    resultString = serialize(resultObj);
                                 } else {
                                     resultString = '{"data":' + r + '}';
                                 }

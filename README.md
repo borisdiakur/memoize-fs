@@ -10,13 +10,15 @@ memoize/cache in file system solution for Node.js
 
 ## Motivation
 This project is inspired by the [memoize project](https://github.com/medikoo/memoize) by [Mariusz Nowak aka medikoo](https://github.com/medikoo).
-The motivation behind this module is that sometimes you have to persist cached function calls but you do not want to deal with an extra process (ie. managing a Redis store).
+The motivation behind this module is that sometimes you have to persist cached function calls but you do not want to deal with an extra process 
+(ie. managing a Redis store).
 
-Memoization is best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see: http://en.wikipedia.org/wiki/Memoization
+Memoization is best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see: 
+http://en.wikipedia.org/wiki/Memoization
 
 ## Features
 
-* Works with almost all kind and any length of function arguments ([__serialization__](#serialization) is handled under the hood)
+* Works with [almost](#common-pitfalls) all kind and any length of function arguments ([__serialization__](#serialization) is handled under the hood)
 * Supports memoization of [__asynchronous functions__](#memoizing-asynchronous-functions)
 * Supports memoization of [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
@@ -73,7 +75,8 @@ memoize.fn(funAsync).then(function (memFn) {
 ### Memoizing promisified functions
 
 You can also memoize a promisified function. memoize-fs assumes a function promisified if its result is _thenable_
-which means that the result is an object with a property `then` of type `function` (read more about JavaScript promises [here](http://www.html5rocks.com/en/tutorials/es6/promises/?redirect_from_locale=de)).
+which means that the result is an object with a property `then` of type `function` 
+(read more about JavaScript promises [here](http://www.html5rocks.com/en/tutorials/es6/promises/?redirect_from_locale=de)).
 So again it's the same as with memoizing synchronous functions.
 Here is an example of memoizing a promisified function:
 
@@ -106,7 +109,8 @@ By default all cache files are saved into the __root cache__ which is the folder
 var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' });
 ```
 
-The `cacheId` option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. Cached function calls will be cached inside that folder:
+The `cacheId` option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder. 
+Cached function calls will be cached inside that folder:
 
 ```javascript
 memoize.fn(fun, { cacheId: 'foobar' }).then(...
@@ -114,7 +118,10 @@ memoize.fn(fun, { cacheId: 'foobar' }).then(...
 
 #### salt
 
-Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same (they have the same function signature and function body) can return different results even when executed with identical arguments. In order to avoid the same cache being used for two different functions you can use the `salt` option which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
+Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same 
+(they have the same function signature and function body) can return different results even when executed with identical arguments. 
+In order to avoid the same cache being used for two different functions you can use the `salt` option 
+which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
 ```javascript
 memoize.fn(fun, { salt: 'foobar' }).then(...
@@ -152,9 +159,27 @@ memoize.invalidate('foobar').then(...
 
 ## Serialization
 
-memoize-fs tries to serialize the arguments of the memoized function in order to create a hash which is used as the name of the cache file to be stored or retrieved.
+memoize-fs uses JSON to serialize the results of a memoized function.
+It also uses JSON, when it tries to serialize the arguments of the memoized function in order to create a hash 
+which is used as the name of the cache file to be stored or retrieved.
 The hash is created from the serialized arguments, the function body and the [salt](#salt) (if provided as an option).
-__Note that memoize-fs serializes arguments using JSON. While it checks for circular references, it ignores arguments and attributes of type function silently.__
+Since memoize-fs is using JSON for serialization, __you should know__ how it works around some of its "limitations":
+
+- It ignores circular references silently
+- It ignores arguments and attributes of type function silently
+- It converts `NaN` to `undefined` silently
+
+Some "limitations" can not (yet?) be worked around:
+
+- Serializing huge objects will fail with one of the following two error messages
+```
+RangeError: Invalid string length
+  at Object.stringify (native)
+  at stringifyResult (node_modules/memoize-fs/index.js:x:y) -> line where memoize-fs uses JSON.stringify
+```
+```
+FATAL ERROR: JS Allocation failed - process out of memory
+```
 
 ## Common pitfalls
 
@@ -162,8 +187,7 @@ __Note that memoize-fs serializes arguments using JSON. While it checks for circ
 The value of these variables may change during runtime but the cached result will remain the same
 when calling the memoized function with the same arguments as the first time when the result was cached.
 
-- Be careful when memoizing a function which excepts arguments which are of type `function` or have attributes of type `function`.
-__These arguments will be ignored silently during serialization__.
+- __You should know__ about how memoize-fs handles [__serialization__](#serialization) under the hood.
 
 ## Contributing
 

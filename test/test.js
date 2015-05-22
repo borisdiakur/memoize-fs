@@ -411,7 +411,7 @@ describe('memoize-fs', function () {
                 }, done);
             });
 
-            it('should return the cached result with the value NaN of a previously memoized function', function (done) {
+            it('should return the cached result with the value NaN of a previously memoized function converting NaN to undefined', function (done) {
                 var cachePath = path.join(__dirname, '../build/cache'),
                     memoize = memoizeFs({ cachePath: cachePath }),
                     c;
@@ -420,7 +420,7 @@ describe('memoize-fs', function () {
                         assert.ok(isNaN(result), 'expected result to be NaN');
                         c = 3;
                         memFn(1, 2).then(function (result) {
-                            assert.ok(isNaN(result), 'expected result to be NaN');
+                            assert.strictEqual(result, undefined, 'expected result to be undefined');
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                                 if (err) {
                                     done(err);
@@ -443,12 +443,17 @@ describe('memoize-fs', function () {
                       this.circular = this;
                     };
                 /* jshint unused: vars */
-                memoize.fn(function (a, b, circ) { return { a: a, b: b, c: c, d : { e: [3, 2, 1], f: null, g: 'qux' } }; }, { cacheId: 'foobar' }).then(function (memFn) {
+                memoize.fn(function (a, b, circ) { return { a: a, b: b, c: c, d : { e: [3, 2, 1], f: null, g: 'qux' }, circ: new Circ() }; }, { cacheId: 'foobar' }).then(function (memFn) {
                     memFn(1, 2, new Circ()).then(function (result) {
-                        assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
+                        assert.ok(Circ.prototype.isPrototypeOf(result.circ));
+                        assert.strictEqual(result.circ.abc, 'Hello');
+                        assert.strictEqual(result.circ.circular.abc, 'Hello');
+                        assert.strictEqual(result.circ.circular.circular.abc, 'Hello');
+                        delete result.circ;
+                        assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } });
                         c = 999;
                         memFn(1, 2, new Circ()).then(function (result) {
-                            assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' } }, 'expected result to deeply equal the one provided');
+                            assert.deepEqual(result, { a: 1, b: 2, c: 3, d : { e: [3, 2, 1], f: null, g: 'qux' }, circ: { abc: 'Hello' } });
                             fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
                                 if (err) {
                                     done(err);
