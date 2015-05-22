@@ -1,7 +1,6 @@
 'use strict';
 
-var _       = require('lodash'),
-    Promise = require('es6-promise').Promise,
+var Promise = require('es6-promise').Promise,
     mkdirp  = require('mkdirp'),
     fs      = require('fs'),
     path    = require('path'),
@@ -68,7 +67,7 @@ module.exports = function (options) {
 
         if (opt && typeof opt !== 'object') { throw new Error('opt of type object expected, got \'' + typeof opt + '\''); }
 
-        var optExt = _.extend({}, opt);
+        var optExt = opt || {};
 
         if (typeof fn !== 'function') { throw new Error('fn of type function expected'); }
         checkOptions(optExt);
@@ -78,8 +77,8 @@ module.exports = function (options) {
         function resolveWithMemFn() {
             return new Promise(function (resolve) {
                 var memFn = function () {
-                    var args = arguments,
-                        fnaCb = _.last(args);
+                    var args = Array.prototype.slice.call(arguments),
+                        fnaCb = args.length ? args[args.length - 1] : undefined;
 
                     if (typeof fnaCb === 'function' && fnaCb.length > 0) {
                         optExt.async = true;
@@ -105,12 +104,12 @@ module.exports = function (options) {
                             }
 
                             function processFnAsync() {
-                                var fnaArgs = _.initial(args),
-                                    fnaCb = _.last(args);
+                                args.pop();
 
-                                fnaArgs.push(function (/* err, result... */) {
-                                    var cbErr = _.first(arguments),
-                                        cbArgs = _.rest(arguments);
+                                args.push(function (/* err, result... */) {
+                                    var cbErr = arguments[0],
+                                        cbArgs = Array.prototype.slice.call(arguments);
+                                    cbArgs.shift();
                                     if (cbErr) {
                                         // if we have an exception we don't cache anything
                                         return reject(cbErr);
@@ -120,7 +119,7 @@ module.exports = function (options) {
                                         resolve(fnaCb.apply(null, cbArgs));
                                     });
                                 });
-                                fn.apply(null, fnaArgs);
+                                fn.apply(null, args);
                             }
 
                             function processFn() {
@@ -173,7 +172,6 @@ module.exports = function (options) {
                             function retrieveAndReturn() {
 
                                 function processFnAsync() {
-                                    var fnaCb = _.last(args);
                                     resolve(fnaCb.apply(null, parseResult(data)));
                                 }
 
