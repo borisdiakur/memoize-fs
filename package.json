@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "es6-promise": "^2.1.0",
-    "mkdirp": "~0.5.0",
-    "rimraf": "~2.3.0"
+    "mkdirp": "^0.5.0",
+    "rimraf": "^2.4.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.0",
