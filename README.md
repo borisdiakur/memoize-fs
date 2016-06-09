@@ -40,11 +40,11 @@ var cachePath = require('path').join(__dirname, '..', 'cache'),
 memoize.fn(fun).then(function (memFn) {
     memFn(1, 2).then(function (result) {
         assert.strictEqual(result, 3);
-        memFn(1, 2).then(function (result) { // cache hit
-            assert.strictEqual(result, 3);
-        }, function (err) { /* handle error */ });
-    }, function (err) { /* handle error */ });
-}, function (err) { /* handle error */ });
+        return memFn(1, 2); // cache hit
+    }).then(function (result) {
+        assert.strictEqual(result, 3);
+    }).catch( /* handle error */ );
+}).catch( /* handle error */ );
 ```
 
 __Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
@@ -64,11 +64,11 @@ var funAsync = function (a, b, cb) {
 
 memoize.fn(funAsync).then(function (memFn) {
     memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }).then(function () {
-        memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }).then(function () { // cache hit
-            // callback is called with previously cached arguments
-        }, function (err) { /* handle error */ });
-    }, function (err) { /* handle error */ });
-}, function (err) { /* handle error */ });
+        return memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }); // cache hit
+    }).then(function () {
+        // callback is called with previously cached arguments
+    }).catch( /* handle error */ );
+}).catch( /* handle error */ );
 ```
 
 ### Memoizing promisified functions
@@ -89,11 +89,11 @@ var funPromisified = function (a, b) {
 memoize.fn(funPromisified).then(function (memFn) {
     memFn(1, 2).then(function (result) {
         assert.strictEqual(result, 3);
-        memFn(1, 2).then(function (result) { // cache hit
-            assert.strictEqual(result, 3);
-        }, function (err) { /* handle error */ });
-    }, function (err) { /* handle error */ });
-}, function (err) { /* handle error */ });
+        return memFn(1, 2); // cache hit
+    }).then(function (result) {
+        assert.strictEqual(result, 3);
+    }).catch( /* handle error */ );
+}).catch( /* handle error */ );
 ```
 
 ### Options
