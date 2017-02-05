@@ -6,6 +6,7 @@ memoize/cache in file system solution for Node.js
 [![Coverage Status](https://coveralls.io/repos/borisdiakur/memoize-fs/badge.svg?branch=master)](https://coveralls.io/r/borisdiakur/memoize-fs?branch=master)
 [![Dependency Status](https://gemnasium.com/borisdiakur/memoize-fs.svg)](https://gemnasium.com/borisdiakur/memoize-fs)
 [![npm version](https://badge.fury.io/js/memoize-fs.svg)](http://badge.fury.io/js/memoize-fs)
+[![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
 ## Motivation
 This project is inspired by the [memoize project](https://github.com/medikoo/memoize) by [Mariusz Nowak aka medikoo](https://github.com/medikoo).

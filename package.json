@@ -4,10 +4,9 @@
   "description": "memoize/cache in file system solution for Node.js",
   "author": "Boris Diakur <contact@borisdiakur.com> (https://github.com/borisdiakur)",
   "scripts": {
-    "test": "mocha test && grunt",
+    "test": "npm run eslint ; mocha test",
+    "eslint": "eslint .",
     "mocha": "mocha --reporter nyan test",
-    "jshint": "grunt hint",
-    "audit": "grunt audit",
     "istanbul": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html",
     "coveralls": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
@@ -30,10 +29,10 @@
   },
   "devDependencies": {
     "coveralls": "^2.11.0",
-    "grunt": "~0.4.5",
-    "grunt-cli": "~0.1.13",
-    "grunt-contrib-jshint": "^0.11.0",
-    "grunt-nsp-package": "~0.0.5",
+    "eslint": "^3.8.1",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.3.0",
+    "eslint-plugin-standard": "^2.0.1",
     "istanbul": "^0.3.5",
     "mocha": "^2.2.5",
     "mocha-lcov-reporter": "0.0.2"
