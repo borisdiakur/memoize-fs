@@ -1165,7 +1165,7 @@ describe('memoize-fs', function () {
         process.removeListener('uncaughtException', originalException)
         process.once('uncaughtException', function (err) {
           process.listeners('uncaughtException').push(originalException)
-          if (err && err.code === 'EPERM') {
+          if (err && (err.code === 'EPERM' || err.code === 'EISDIR')) {
             done()
           } else {
             done(err)
