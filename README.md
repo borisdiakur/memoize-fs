@@ -82,7 +82,7 @@ Here is an example of memoizing a promisified function:
 
 ```javascript
 var funPromisified = function (a, b) {
-    return new require('es6-promise').Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         setTimeout(function () { resolve(a + b); }, 100);
     });
 };
@@ -125,6 +125,14 @@ which mutates the hash key created for the memoized function which in turn defin
 
 ```javascript
 memoize.fn(fun, { salt: 'foobar' }).then(...
+```
+
+#### maxAge
+
+With `maxAge` option you can ensure that cache for given call is cleared after a predefined period of time (in milliseconds).
+
+```javascript
+memoize.fn(fun, { maxAge: 10000 }).then(...
 ```
 
 #### force

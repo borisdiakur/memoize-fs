@@ -140,6 +140,18 @@ describe('memoize-fs', function () {
           done()
         })
       })
+
+      it('should return a rejecting promise instance if maxAge param is not of type number', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        memoize.fn(function () {
+        }, {maxAge: true}).then(function () {
+          done(Error('entered resolve handler instead of error handler'))
+        }, function (err) {
+          assert.ok(err)
+          done()
+        })
+      })
     })
 
     describe('process fn', function () {
@@ -985,15 +997,73 @@ describe('memoize-fs', function () {
         }).catch(done)
       })
 
-      it('should return a rejecting promise instance if cacheId param is not of type string', function (done) {
+      it('should invalidate cache after timeout with maxAge option set', function (done) {
         var cachePath = path.join(__dirname, '../build/cache')
         var memoize = memoizeFs({cachePath: cachePath})
-        memoize.invalidate(true).then(function () {
-          done(Error('entered resolve handler instead of error handler'))
-        }, function (err) {
-          assert.ok(err)
-          done()
-        })
+        var c = 3
+        memoize.fn(function (a, b) {
+          return a + b + c
+        }, {cacheId: 'foobar', maxAge: 10}).then(function (memFn) {
+          return memFn(1, 2)
+        }).then(function (result) {
+          assert.strictEqual(result, 6, 'expected result to strictly equal 6')
+        }).then(function () {
+          return new Promise(function (resolve) {
+            setTimeout(resolve, 20)
+          })
+        }).then(function () {
+          c = 4
+          return memoize.fn(function (a, b) {
+            return a + b + c
+          }, {cacheId: 'foobar'})
+        }).then(function (memFn) {
+          return memFn(1, 2)
+        }).then(function (result) {
+          assert.strictEqual(result, 7, 'expected result to strictly equal 7')
+          fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+            if (err) {
+              done(err)
+            } else {
+              assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
+              done()
+            }
+          })
+        }).catch(done)
+      })
+
+      it('should not throw if it fails to invalidate cache after timeout with maxAge option set, because already invalidated manually', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        var c = 3
+        memoize.fn(function (a, b) {
+          return a + b + c
+        }, {cacheId: 'foobar', maxAge: 10}).then(function (memFn) {
+          return memFn(1, 2)
+        }).then(function (result) {
+          assert.strictEqual(result, 6, 'expected result to strictly equal 6')
+          return memoize.invalidate('foobar')
+        }).then(function () {
+          return new Promise(function (resolve) {
+            setTimeout(resolve, 20)
+          })
+        }).then(function () {
+          c = 4
+          return memoize.fn(function (a, b) {
+            return a + b + c
+          }, {cacheId: 'foobar'})
+        }).then(function (memFn) {
+          return memFn(1, 2)
+        }).then(function (result) {
+          assert.strictEqual(result, 7, 'expected result to strictly equal 7')
+          fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+            if (err) {
+              done(err)
+            } else {
+              assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
+              done()
+            }
+          })
+        }).catch(done)
       })
     })
 
@@ -1027,29 +1097,19 @@ describe('memoize-fs', function () {
         memoize.fn(function () { return 1 }, {cacheId: 'foobar'}).then(function (memFn) {
           return memFn()
         }).then(function () {
-          fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
-            if (err) {
-              done(err)
-            } else {
-              assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
-              fs.chmod(path.join(cachePath, 'foobar', files[0]), 0, function (err) {
-                if (err) {
-                  done(err)
-                } else {
-                  memoize.fn(function () { return 1 }, {
-                    cacheId: 'foobar',
-                    force: true
-                  }).then(function (memFn) {
-                    return memFn()
-                  }).then(function () {
-                    done(Error('entered resolve handler instead of error handler'))
-                  }, function (err) {
-                    assert.ok(err)
-                    done()
-                  })
-                }
-              })
-            }
+          var files = fs.readdirSync(path.join(cachePath, 'foobar'))
+          assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
+          fs.chmodSync(path.join(cachePath, 'foobar', files[0]), 0)
+          memoize.fn(function () { return 1 }, {
+            cacheId: 'foobar',
+            force: true
+          }).then(function (memFn) {
+            return memFn()
+          }).then(function () {
+            done(Error('entered resolve handler instead of error handler'))
+          }, function (err) {
+            assert.ok(err)
+            done()
           })
         }).catch(done)
       })
@@ -1092,6 +1152,43 @@ describe('memoize-fs', function () {
         }, function (err) {
           assert.ok(err)
           done()
+        })
+      })
+
+      it('should throw if it fails to invalidate cache after timeout with maxAge option set, because of EPERM error', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        var c = 3
+
+        // remove mocha listener for uncaught exception, add own, then reattach the mocha listener
+        var originalException = process.listeners('uncaughtException').pop()
+        process.removeListener('uncaughtException', originalException)
+        process.once('uncaughtException', function (err) {
+          process.listeners('uncaughtException').push(originalException)
+          if (err && err.code === 'EPERM') {
+            done()
+          } else {
+            done(err)
+          }
+        })
+
+        memoize.fn(function (a, b) {
+          return a + b + c
+        }, {
+          cacheId: 'foobar',
+          maxAge: 10
+        }).then(function (memFn) {
+          return memFn(1, 2)
+        }).then(function (result) {
+          assert.strictEqual(result, 6, 'expected result to strictly equal 6')
+          var files = fs.readdirSync(path.join(cachePath, 'foobar'))
+          assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
+
+          // replace cache file with a non-empty folder with the same name as the cache file
+          var cacheFilePath = path.join(cachePath, 'foobar', files[0])
+          fs.unlinkSync(cacheFilePath)
+          fs.mkdirSync(cacheFilePath)
+          fs.writeFileSync(path.join(cachePath, 'qux'), 'quz')
         })
       })
     })

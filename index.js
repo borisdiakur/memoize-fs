@@ -67,6 +67,9 @@ module.exports = function (options) {
       if (optExt.cacheId && typeof optExt.cacheId !== 'string') {
         throw new Error('cacheId option of type string expected, got \'' + typeof optExt.cacheId + '\'')
       }
+      if (optExt.maxAge && typeof optExt.maxAge !== 'number') {
+        throw new Error('maxAge option of type number bigger zero expected')
+      }
     }
 
     if (opt && typeof opt !== 'object') {
@@ -106,6 +109,15 @@ module.exports = function (options) {
                   resultString = serialize(resultObj)
                 } else {
                   resultString = '{"data":' + r + '}'
+                }
+                if (optExt.maxAge) {
+                  setTimeout(function () {
+                    fs.unlink(filePath, function (err) {
+                      if (err && err.code !== 'ENOENT') {
+                        throw err
+                      }
+                    })
+                  }, optExt.maxAge)
                 }
                 fs.writeFile(filePath, resultString, cb)
               }

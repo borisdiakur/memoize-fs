@@ -1,3 +1,7 @@
+### 1.1.0 (2017-02-05)
+
+* added timed cache invalidation with option maxAge
+
 ### 1.0.5 (2016-11-22)
 
 * updated es6-promise@^4.0.5
