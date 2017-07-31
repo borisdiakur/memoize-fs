@@ -48,7 +48,7 @@ memoize.fn(fun).then(function (memFn) {
 }).catch( /* handle error */ );
 ```
 
-__Note that a result of a momoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
+__Note that a result of a memoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
 
 ### Memoizing asynchronous functions
 
@@ -109,7 +109,7 @@ By default all cache files are saved into the __root cache__ which is the folder
 var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' });
 ```
 
-The `cacheId` option which you can specify during momoization of a function resolves to the name of a subfolder created inside the root cache folder.
+The `cacheId` option which you can specify during memoization of a function resolves to the name of a subfolder created inside the root cache folder.
 Cached function calls will be cached inside that folder:
 
 ```javascript
