@@ -9,6 +9,33 @@ var crypto = require('crypto')
 var parseScript = require('shift-parser').parseScript
 
 module.exports = buildMemoizer
+module.exports.getCacheFilePath = getCacheFilePath
+
+function serialize (val) {
+  var circRefColl = []
+  return JSON.stringify(val, function (name, value) {
+    if (typeof value === 'function') {
+      return // ignore arguments and attributes of type function silently
+    }
+    if (typeof value === 'object' && value !== null) {
+      if (circRefColl.indexOf(value) !== -1) {
+        // circular reference found, discard key
+        return
+      }
+      // store value in collection
+      circRefColl.push(value)
+    }
+    return value
+  })
+}
+
+function getCacheFilePath (fn, args, opt, cachePath) {
+  var salt = opt.salt || ''
+  var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(String(fn))) : String(fn))
+  var argsStr = serialize(args)
+  var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
+  return path.join(cachePath, opt.cacheId, hash)
+}
 
 function buildMemoizer (options) {
   // check args
@@ -30,32 +57,6 @@ function buildMemoizer (options) {
         }
       })
     })
-  }
-
-  function serialize (val) {
-    var circRefColl = []
-    return JSON.stringify(val, function (name, value) {
-      if (typeof value === 'function') {
-        return // ignore arguments and attributes of type function silently
-      }
-      if (typeof value === 'object' && value !== null) {
-        if (circRefColl.indexOf(value) !== -1) {
-          // circular reference found, discard key
-          return
-        }
-        // store value in collection
-        circRefColl.push(value)
-      }
-      return value
-    })
-  }
-
-  function getCacheFilePath (fn, args, opt, cachePath) {
-    var salt = opt.salt || ''
-    var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(String(fn))) : String(fn))
-    var argsStr = serialize(args)
-    var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
-    return path.join(cachePath, opt.cacheId, hash)
   }
 
   function memoizeFn (fn, opt) {
