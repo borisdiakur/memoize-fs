@@ -6,6 +6,7 @@ var fs = require('fs')
 var path = require('path')
 var rmdir = require('rimraf')
 var crypto = require('crypto')
+var parseScript = require('shift-parser').parseScript
 
 module.exports = function (options) {
   // check args
@@ -49,7 +50,8 @@ module.exports = function (options) {
 
   function getCacheFilePath (fn, args, opt) {
     var salt = opt.salt || ''
-    var fnStr = (opt.noBody ? '' : String(fn))
+    var source = String(fn)
+    var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(source)) : source)
     var argsStr
     var hash
 

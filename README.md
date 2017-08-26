@@ -143,6 +143,14 @@ The `force` option forces the re-execution of an already memoized function and t
 memoize.fn(fun, { force: true }).then(...
 ```
 
+#### astBody
+
+If you want to use the function AST instead the function body when generating the hash ([see serialization](#serialization)), set the option `astBody` to `true`. This allows the function source code to be reformatted without busting the cache. See https://github.com/borisdiakur/memoize-fs/issues/6 for details.
+
+```javascript
+memoize.fn(fun, { astBody: true }).then(...
+```
+
 #### noBody
 
 If for some reason you want to omit the function body when generating the hash ([see serialization](#serialization)), set the option `noBody` to `true`.

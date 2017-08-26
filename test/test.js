@@ -927,6 +927,45 @@ describe('memoize-fs', function () {
       })
     })
 
+    describe('astBody', function () {
+      it('should cache the result of a memoized function on second execution with option astBody set to true with equivalent function ASTs', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        memoize.fn(function foo () {
+          // double quoted
+          return "string" // eslint-disable-line quotes
+        }, {
+          cacheId: 'foobar',
+          serialize: 'qux',
+          astBody: true
+        }).then(function (memFn) {
+          return memFn()
+        }).then(function (result) {
+          assert.strictEqual(result, 'string', 'expected result to strictly equal "string"')
+          return memoize.fn(function foo () {
+            // single quoted
+            return 'string'
+          }, {
+            cacheId: 'foobar',
+            serialize: 'qux',
+            astBody: true
+          })
+        }).then(function (memFn) {
+          return memFn()
+        }).then(function (result) {
+          assert.strictEqual(result, 'string', 'expected result to strictly equal "string"')
+          fs.readdir(path.join(cachePath, 'foobar'), function (err, files) {
+            if (err) {
+              done(err)
+            } else {
+              assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
+              done()
+            }
+          })
+        }).catch(done)
+      })
+    })
+
     describe('invalidate cache', function () {
       it('should recache the result of a memoized function after invalidating the cache before the second execution', function (done) {
         var cachePath = path.join(__dirname, '../build/cache')
