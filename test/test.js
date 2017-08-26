@@ -16,7 +16,7 @@ describe('memoize-fs', function () {
 
   describe('.getCacheFilePath', function () {
     it('should return a path', function () {
-      var actual = memoizeFs.getCacheFilePath(function () {}, [], {cacheId: './'}, '/')
+      var actual = memoizeFs.getCacheFilePath(function () {}, [], {cacheId: './', cachePath: '/'})
       var expected = '/06f254f0b753e0d195804ed804846ba9'
       assert.strictEqual(actual, expected)
     })
