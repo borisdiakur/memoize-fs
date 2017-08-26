@@ -14,6 +14,14 @@ describe('memoize-fs', function () {
     rmdir(path.join(__dirname, '../build/cache'), done)
   })
 
+  describe('.getCacheFilePath', function () {
+    it('should return a path', function () {
+      var actual = memoizeFs.getCacheFilePath(function () {}, [], {cacheId: './', cachePath: '/'})
+      var expected = '/06f254f0b753e0d195804ed804846ba9'
+      assert.strictEqual(actual, expected)
+    })
+  })
+
   describe('unit tests', function () {
     describe('check args', function () {
       it('should throw an error when options param is not provided', function (done) {

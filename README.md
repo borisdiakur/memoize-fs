@@ -179,6 +179,14 @@ memoize-fs uses JSON to serialize the results of a memoized function.
 It also uses JSON, when it tries to serialize the arguments of the memoized function in order to create a hash
 which is used as the name of the cache file to be stored or retrieved.
 The hash is created from the serialized arguments, the function body and the [salt](#salt) (if provided as an option).
+
+You can generate this hash using `memoize.getCacheFilePath`:
+
+```js
+var memoize = require('memoize-fs')
+memoize.getCacheFilePath(function () {}, [], {cacheId: './', cachePath: '/'})
+// -> '/06f254f0b753e0d195804ed804846ba9'
+
 Since memoize-fs is using JSON for serialization, __you should know__ how it works around some of its "limitations":
 
 - It ignores circular references silently
