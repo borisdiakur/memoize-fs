@@ -16,35 +16,35 @@ describe('memoize-fs', function () {
 
   describe('unit tests', function () {
     describe('check args', function () {
-      it('should throw an errer when options param is not provided', function (done) {
+      it('should throw an error when options param is not provided', function (done) {
         assert.throws(function () {
           memoizeFs()
         }, Error, 'expected to throw an error when options parameter is missing')
         done()
       })
 
-      it('should throw an errer when options param is not of type object', function (done) {
+      it('should throw an error when options param is not of type object', function (done) {
         assert.throws(function () {
           memoizeFs('foobar')
         }, Error, 'expected to throw an error when options parameter is not of type object')
         done()
       })
 
-      it('should throw an errer when option param cachePath is not provided', function (done) {
+      it('should throw an error when option param cachePath is not provided', function (done) {
         assert.throws(function () {
           memoizeFs({})
         }, Error, 'expected to throw an error when option param cachePath is not provided')
         done()
       })
 
-      it('should throw an errer when option param cachePath is not of type string', function (done) {
+      it('should throw an error when option param cachePath is not of type string', function (done) {
         assert.throws(function () {
           memoizeFs({cachePath: true})
         }, Error, 'expected to throw an error when option param cachePath is not of type string')
         done()
       })
 
-      it('should throw an errer when option value is not of type object', function (done) {
+      it('should throw an error when option value is not of type object', function (done) {
         assert.throws(function () {
           memoizeFs('foobar')
         }, Error, 'expected to throw an error when option value is not of type object')

@@ -52,7 +52,7 @@ __Note that a result of a memoized function is always a [Promise](http://www.htm
 
 ### Memoizing asynchronous functions
 
-memoise-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
+memoize-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
 So basically you don't have to do anything differently than when memoizing synchronous functions. Just make sure the above condition is fulfilled.
 Here is an example of memoizing a function with a callback:
 
