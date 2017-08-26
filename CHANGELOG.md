@@ -1,3 +1,7 @@
+### 1.3.0 (2017-08-26)
+
+* exporting getCacheFilePath method
+
 ### 1.2.0 (2017-08-26)
 
 * added astBody option
