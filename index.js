@@ -49,7 +49,8 @@ module.exports = function (options) {
 
   function getCacheFilePath (fn, args, opt) {
     var salt = opt.salt || ''
-    var fnStr = (opt.noBody ? '' : String(fn))
+    var source = String(fn)
+    var fnStr = (opt.noBody ? '' : source)
     var argsStr
     var hash
 
