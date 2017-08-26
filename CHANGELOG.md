@@ -1,3 +1,7 @@
+### 1.2.0 (2017-08-26)
+
+* added astBody option
+
 ### 1.1.0 (2017-02-05)
 
 * added timed cache invalidation with option maxAge
