@@ -8,7 +8,9 @@ var rmdir = require('rimraf')
 var crypto = require('crypto')
 var parseScript = require('shift-parser').parseScript
 
-module.exports = function (options) {
+module.exports = buildMemoizer
+
+function buildMemoizer (options) {
   // check args
   if (typeof options !== 'object') {
     throw new Error('options of type object expected')
