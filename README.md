@@ -185,7 +185,7 @@ You can generate this hash using `memoize.getCacheFilePath`:
 ```js
 var memoize = require('memoize-fs')
 memoize.getCacheFilePath(function () {}, ['arg', 'arg'], {cacheId: 'foobar', cachePath: '/'})
-// -> '/06f254f0b753e0d195804ed804846ba9'
+// -> '/foobar/06f254...'
 ```
 
 Since memoize-fs is using JSON for serialization, __you should know__ how it works around some of its "limitations":
