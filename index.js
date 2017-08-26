@@ -50,12 +50,12 @@ function buildMemoizer (options) {
     })
   }
 
-  function getCacheFilePath (fn, args, opt) {
+  function getCacheFilePath (fn, args, opt, cachePath) {
     var salt = opt.salt || ''
     var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(String(fn))) : String(fn))
     var argsStr = serialize(args)
     var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
-    return path.join(options.cachePath, opt.cacheId, hash)
+    return path.join(cachePath, opt.cacheId, hash)
   }
 
   function memoizeFn (fn, opt) {
@@ -95,7 +95,7 @@ function buildMemoizer (options) {
           }
 
           return new Promise(function (resolve, reject) {
-            var filePath = getCacheFilePath(fn, args, optExt)
+            var filePath = getCacheFilePath(fn, args, optExt, options.cachePath)
 
             function cacheAndReturn () {
               var result
