@@ -183,8 +183,8 @@ The hash is created from the serialized arguments, the function body and the [sa
 You can generate this hash using `memoize.getCacheFilePath`:
 
 ```js
-var memoize = require('memoize-fs')
-memoize.getCacheFilePath(function () {}, ['arg', 'arg'], {cacheId: 'foobar', cachePath: '/'})
+var memoize = require('memoize-fs')({cachePath: '/'})
+memoize.getCacheFilePath(function () {}, ['arg', 'arg'], {cacheId: 'foobar'})
 // -> '/foobar/06f254...'
 ```
 
