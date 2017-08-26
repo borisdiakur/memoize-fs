@@ -50,14 +50,9 @@ module.exports = function (options) {
 
   function getCacheFilePath (fn, args, opt) {
     var salt = opt.salt || ''
-    var source = String(fn)
-    var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(source)) : source)
-    var argsStr
-    var hash
-
-    argsStr = serialize(args)
-
-    hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
+    var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(String(fn))) : String(fn))
+    var argsStr = serialize(args)
+    var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
     return path.join(options.cachePath, opt.cacheId, hash)
   }
 
