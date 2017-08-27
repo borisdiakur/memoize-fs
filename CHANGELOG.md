@@ -1,3 +1,7 @@
+### 1.4.0 (2017-08-27)
+
+* adding getCacheFilePath to constructed memoizer
+
 ### 1.3.0 (2017-08-26)
 
 * exporting getCacheFilePath method
