@@ -96,7 +96,7 @@ function buildMemoizer (options) {
           }
 
           return new Promise(function (resolve, reject) {
-            var filePath = getCacheFilePath(fn, args, Object.assign({}, optExt, {cachePath: options.cachePath}))
+            var filePath = getCacheFilePathBound(fn, args, optExt)
 
             function cacheAndReturn () {
               var result
@@ -238,6 +238,10 @@ function buildMemoizer (options) {
     })
   }
 
+  function getCacheFilePathBound (fn, args, opt) {
+    return getCacheFilePath(fn, args, Object.assign({}, opt, {cachePath: options.cachePath}))
+  }
+
   var cache = initCache(options.cachePath)
 
   return {
@@ -248,6 +252,7 @@ function buildMemoizer (options) {
         throw err
       })
     },
+    'getCacheFilePath': getCacheFilePathBound,
     'invalidate': invalidateCache
   }
 }

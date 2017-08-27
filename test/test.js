@@ -20,6 +20,13 @@ describe('memoize-fs', function () {
       var expected = '/06f254f0b753e0d195804ed804846ba9'
       assert.strictEqual(actual, expected)
     })
+
+    it('should be available on memoizer', function () {
+      var cachePath = '/'
+      var actual = memoizeFs({cachePath: cachePath}).getCacheFilePath(function () {}, [], {cacheId: './'})
+      var expected = '/06f254f0b753e0d195804ed804846ba9'
+      assert.strictEqual(actual, expected)
+    })
   })
 
   describe('unit tests', function () {
