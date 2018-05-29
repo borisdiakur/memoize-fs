@@ -476,6 +476,36 @@ describe('memoize-fs', function () {
         }).catch(done)
       })
 
+      it('should return the cached result with the value returned by fs.readFileSync with utf8 encoding', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        const fn = function () { return fs.readFileSync(__filename, 'utf8') }
+        memoize.fn(fn).then(function (memFn) {
+          memFn(null).then(function (result) {
+            assert.strictEqual(result, fn(), 'expected result to strictly equal this file content')
+            return memFn(null)
+          }).then(function (result) {
+            assert.strictEqual(result, fn(), 'expected result to strictly equal this file content')
+            done()
+          }).catch(done)
+        }).catch(done)
+      })
+
+      it('should return the cached result with the value returned by fs.readFileSync', function (done) {
+        var cachePath = path.join(__dirname, '../build/cache')
+        var memoize = memoizeFs({cachePath: cachePath})
+        const fn = function () { return fs.readFileSync(__filename) }
+        memoize.fn(fn).then(function (memFn) {
+          memFn(null).then(function (result) {
+            assert.deepEqual(result, fn(), 'expected result to strictly equal this file content')
+            return memFn(null)
+          }).then(function (result) {
+            assert.deepEqual(result, fn(), 'expected result to strictly equal this file content')
+            done()
+          }).catch(done)
+        }).catch(done)
+      })
+
       it('should return the cached result of type object of a previously memoized function', function (done) {
         var cachePath = path.join(__dirname, '../build/cache')
         var memoize = memoizeFs({cachePath: cachePath})
