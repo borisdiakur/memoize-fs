@@ -1144,29 +1144,6 @@ describe('memoize-fs', function () {
       })
     })
 
-    it('should throw an error when trying to write cache on a file without having the necessary permission', function (done) {
-      var cachePath = path.join(__dirname, '../build/cache')
-      var memoize = memoizeFs({cachePath: cachePath})
-      memoize.fn(function () { return 1 }, {cacheId: 'foobar'}).then(function (memFn) {
-        return memFn()
-      }).then(function () {
-        var files = fs.readdirSync(path.join(cachePath, 'foobar'))
-        assert.strictEqual(files.length, 1, 'expected exactly one file in cache with id foobar')
-        fs.chmodSync(path.join(cachePath, 'foobar', files[0]), 0)
-        memoize.fn(function () { return 1 }, {
-          cacheId: 'foobar',
-          force: true
-        }).then(function (memFn) {
-          return memFn()
-        }).then(function () {
-          done(Error('entered resolve handler instead of error handler'))
-        }, function (err) {
-          assert.ok(err)
-          done()
-        })
-      }).catch(done)
-    })
-
     it('should throw an error trying to invalidate cache without having the necessary permission', function (done) {
       var cachePath = path.join(__dirname, '../build/cache')
       var memoize = memoizeFs({cachePath: cachePath})

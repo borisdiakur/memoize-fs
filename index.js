@@ -3,6 +3,7 @@
 var Promise = require('es6-promise').Promise
 var mkdirp = require('mkdirp')
 var fs = require('fs')
+var steno = require('steno')
 var path = require('path')
 var rmdir = require('rimraf')
 var crypto = require('crypto')
@@ -119,7 +120,7 @@ function buildMemoizer (options) {
                     })
                   }, optExt.maxAge)
                 }
-                fs.writeFile(filePath, resultString, cb)
+                steno.writeFile(filePath, resultString, cb)
               }
 
               function processFnAsync () {
