@@ -795,6 +795,20 @@ describe('memoize-fs', function () {
         }).catch(done)
       }).catch(done)
     })
+
+    it('should only run the memoized function once even when called with the same arguments on the same tick', function (done) {
+      var cachePath = path.join(__dirname, '../build/cache')
+      var memoize = memoizeFs({cachePath: cachePath})
+      var n = 0
+      memoize.fn(function (cb) {
+        return n++
+      }).then(function (memFn) {
+        return Promise.all([memFn(), memFn()])
+      }).then(function () {
+        assert.strictEqual(n, 1)
+        done()
+      }).catch(done)
+    })
   })
 
   describe('force recaching', function () {

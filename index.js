@@ -38,6 +38,8 @@ function getCacheFilePath (fn, args, opt) {
 }
 
 function buildMemoizer (options) {
+  var promiseCache = {}
+
   // check args
   if (typeof options !== 'object') {
     throw new Error('options of type object expected')
@@ -95,9 +97,13 @@ function buildMemoizer (options) {
             optExt.async = true
           }
 
-          return new Promise(function (resolve, reject) {
-            var filePath = getCacheFilePathBound(fn, args, optExt)
+          var filePath = getCacheFilePathBound(fn, args, optExt)
 
+          if (promiseCache[filePath]) {
+            return promiseCache[filePath]
+          }
+
+          promiseCache[filePath] = new Promise(function (resolve, reject) {
             function cacheAndReturn () {
               var result
 
@@ -213,6 +219,10 @@ function buildMemoizer (options) {
               }
             })
           })
+          promiseCache[filePath].then(function (result) {
+            delete promiseCache[filePath]
+          })
+          return promiseCache[filePath]
         }
         resolve(memFn)
       })
