@@ -26,7 +26,8 @@
     "es6-promise": "^4.0.5",
     "mkdirp": "^0.5.0",
     "rimraf": "^2.4.0",
-    "shift-parser": "^5.0.7"
+    "shift-parser": "^5.0.7",
+    "steno": "^0.4.4"
   },
   "devDependencies": {
     "coveralls": "^2.11.0",
