@@ -1,3 +1,7 @@
+### 1.4.1 (2018-07-29)
+
+* updated dependencies
+
 ### 1.4.0 (2017-08-27)
 
 * adding getCacheFilePath to constructed memoizer

@@ -58,8 +58,8 @@ describe('memoize-fs', function () {
       memoize.fn(function () {
       }).then(function (memoized) {
         assert.strictEqual(typeof memoized, 'function', 'expected a memoized function to be passed as the only argument of the resolved handler')
-        fs.exists(cachePath, function (exists) {
-          assert.ok(exists, 'expected a cache folder with given path to exist')
+        fs.access(cachePath, fs.constants.F_OK, function (err) {
+          assert.ok(!err, 'expected a cache folder with given path to exist')
           done()
         })
       }, done)
@@ -71,8 +71,8 @@ describe('memoize-fs', function () {
       memoize.fn(function () {
       }, {cacheId: 'foobar'}).then(function (memoized) {
         assert.strictEqual(typeof memoized, 'function', 'expected a memoized function to be passed as the only argument of the resolved handler')
-        fs.exists(path.join(cachePath, 'foobar'), function (exists) {
-          assert.ok(exists, 'expected a cache folder with given path to exist')
+        fs.access(path.join(cachePath, 'foobar'), fs.constants.F_OK, function (err) {
+          assert.ok(!err, 'expected a cache folder with given path to exist')
           done()
         })
       }, function (err) {
@@ -506,7 +506,7 @@ describe('memoize-fs', function () {
           assert.strictEqual(result.circ.circular.abc, 'Hello')
           assert.strictEqual(result.circ.circular.circular.abc, 'Hello')
           delete result.circ
-          assert.deepEqual(result, {
+          assert.deepStrictEqual(result, {
             a: 1,
             b: 2,
             c: 3,
@@ -523,7 +523,7 @@ describe('memoize-fs', function () {
           c = 999
           return memFn(1, 2, new Circ())
         }).then(function (result) {
-          assert.deepEqual(result, {
+          assert.deepStrictEqual(result, {
             a: 1,
             b: 2,
             c: 3,
@@ -1038,11 +1038,11 @@ describe('memoize-fs', function () {
         assert.strictEqual(result, 6, 'expected result to strictly equal 6')
         return memoize.invalidate()
       }).then(function () {
-        fs.exists(cachePath, function (exists) {
-          if (exists) {
+        fs.access(cachePath, fs.constants.F_OK, function (err) {
+          if (!err) {
             done(Error('Cache folder should not exist after invalidating root cache'))
           } else {
-            assert.notEqual(exists, true, 'expected to not find the cache folder after invalidating the root cache')
+            assert.notStrictEqual(!err, true, 'expected to not find the cache folder after invalidating the root cache')
             c = 4
             memoize.fn(function (a, b) {
               return a + b + c
