@@ -1,5 +1,6 @@
 ### 1.4.1 (2018-07-29)
 
+* fix: run the memoized function once even when called with the same arguments on the same tick
 * updated dependencies
 
 ### 1.4.0 (2017-08-27)
