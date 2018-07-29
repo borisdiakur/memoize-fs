@@ -1,6 +1,5 @@
 sudo: false
 language: node_js
 node_js:
-- '4.4.6'
 - '6.9.0'
 - '9.11.2'
