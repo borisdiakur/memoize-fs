@@ -1,6 +1,6 @@
 {
   "name": "memoize-fs",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "memoize/cache in file system solution for Node.js",
   "author": "Boris Diakur <contact@borisdiakur.com> (https://github.com/borisdiakur)",
   "scripts": {
@@ -42,7 +42,21 @@
   },
   "private": false,
   "main": "index.js",
-  "keywords": ["memoize", "memoizer", "cache", "memoization", "memo", "memcached", "hashing", "storage", "persistence", "caching", "memory", "file system", "fs"],
+  "keywords": [
+    "memoize",
+    "memoizer",
+    "cache",
+    "memoization",
+    "memo",
+    "memcached",
+    "hashing",
+    "storage",
+    "persistence",
+    "caching",
+    "memory",
+    "file system",
+    "fs"
+  ],
   "license": "MIT",
   "readmeFilename": "README.md"
 }
