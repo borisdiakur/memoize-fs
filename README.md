@@ -192,6 +192,7 @@ Since memoize-fs is using JSON for serialization, __you should know__ how it wor
 - It ignores circular references silently
 - It ignores arguments and attributes of type function silently
 - It converts `NaN` to `undefined` silently
+- It converts all objects, no matter what class they were an instance of, to objects with prototype `Object` (see [#16](https://github.com/borisdiakur/memoize-fs/issues/16))
 
 Some "limitations" can not (yet?) be worked around:
 
