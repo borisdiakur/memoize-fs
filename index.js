@@ -6,7 +6,7 @@ var fs = require('fs')
 var path = require('path')
 var rmdir = require('rimraf')
 var crypto = require('crypto')
-var parseScript = require('shift-parser').parseScript
+var meriyah = require('meriyah')
 
 module.exports = buildMemoizer
 module.exports.getCacheFilePath = getCacheFilePath
@@ -31,7 +31,14 @@ function serialize (val) {
 
 function getCacheFilePath (fn, args, opt) {
   var salt = opt.salt || ''
-  var fnStr = (opt.noBody ? '' : opt.astBody ? JSON.stringify(parseScript(String(fn))) : String(fn))
+  var fnStr = ''
+  if (!opt.noBody) {
+    fnStr = String(fn)
+    if (opt.astBody) {
+      fnStr = meriyah.parse(fnStr, { jsx: true, next: true })
+    }
+    fnStr = opt.astBody ? JSON.stringify(fnStr) : fnStr
+  }
   var argsStr = serialize(args)
   var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
   return path.join(opt.cachePath, opt.cacheId, hash)

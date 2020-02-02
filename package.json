@@ -24,9 +24,9 @@
   },
   "dependencies": {
     "es6-promise": "^4.2.4",
+    "meriyah": "^1.9.7",
     "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.2",
-    "shift-parser": "^5.2.4"
+    "rimraf": "^2.6.2"
   },
   "devDependencies": {
     "coveralls": "^3.0.2",
