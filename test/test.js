@@ -977,6 +977,27 @@ describe('memoize-fs', function () {
         })
       }).catch(done)
     })
+    it('should work with ES2020', async () => {
+      var cachePath = path.join(__dirname, '../build/cache')
+      var memoize = memoizeFs({cachePath: cachePath})
+      var idx = 0
+
+      const memoizedFunc = await memoize.fn(async (a) => {
+        const num = await Promise.resolve(100 + a)
+        idx = num
+
+        return { num, idx }
+      })
+
+      memoizedFunc(1).then(async (result) => {
+        assert.strictEqual(result.num, 101, 'should be 101')
+        assert.strictEqual(result.num, idx, 'should num be equal to idx')
+
+        const res = await memoizedFunc(222)
+        assert.strictEqual(res.num, 101, 'should be memoized 1')
+        assert.strictEqual(res.num, idx, 'should be memoized 2')
+      })
+    })
   })
 
   describe('getCacheFilePath', function () {
