@@ -1,3 +1,9 @@
+### 2.0.0 (2020-02-03)
+
+* __BREAKING CHANGE__: drop support for node < 10
+* fix: shift-parser throws when we try to use astBody: true (#17)
+* update all dependencies
+
 ### 1.4.1 (2018-07-29)
 
 * fix: run the memoized function once even when called with the same arguments on the same tick

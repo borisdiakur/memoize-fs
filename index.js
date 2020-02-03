@@ -1,18 +1,15 @@
-'use strict'
-
-var Promise = require('es6-promise').Promise
-var mkdirp = require('mkdirp')
-var fs = require('fs')
-var path = require('path')
-var rmdir = require('rimraf')
-var crypto = require('crypto')
-var meriyah = require('meriyah')
+const mkdirp = require('mkdirp')
+const fs = require('fs')
+const path = require('path')
+const rmdir = require('rimraf')
+const crypto = require('crypto')
+const meriyah = require('meriyah')
 
 module.exports = buildMemoizer
 module.exports.getCacheFilePath = getCacheFilePath
 
 function serialize (val) {
-  var circRefColl = []
+  const circRefColl = []
   return JSON.stringify(val, function (name, value) {
     if (typeof value === 'function') {
       return // ignore arguments and attributes of type function silently
@@ -30,8 +27,8 @@ function serialize (val) {
 }
 
 function getCacheFilePath (fn, args, opt) {
-  var salt = opt.salt || ''
-  var fnStr = ''
+  const salt = opt.salt || ''
+  let fnStr = ''
   if (!opt.noBody) {
     fnStr = String(fn)
     if (opt.astBody) {
@@ -39,13 +36,13 @@ function getCacheFilePath (fn, args, opt) {
     }
     fnStr = opt.astBody ? JSON.stringify(fnStr) : fnStr
   }
-  var argsStr = serialize(args)
-  var hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
+  const argsStr = serialize(args)
+  const hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
   return path.join(opt.cachePath, opt.cacheId, hash)
 }
 
 function buildMemoizer (options) {
-  var promiseCache = {}
+  const promiseCache = {}
 
   // check args
   if (typeof options !== 'object') {
@@ -58,13 +55,9 @@ function buildMemoizer (options) {
   // check for existing cache folder, if not found, create folder, then resolve
   function initCache (cachePath) {
     return new Promise(function (resolve, reject) {
-      mkdirp(cachePath, function (err) {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
+      return mkdirp(cachePath).then(() => {
+        resolve()
+      }).catch(reject)
     })
   }
 
@@ -85,7 +78,7 @@ function buildMemoizer (options) {
       throw new Error('opt of type object expected, got \'' + typeof opt + '\'')
     }
 
-    var optExt = opt || {}
+    const optExt = opt || {}
 
     if (typeof fn !== 'function') {
       throw new Error('fn of type function expected')
@@ -96,15 +89,15 @@ function buildMemoizer (options) {
 
     function resolveWithMemFn () {
       return new Promise(function (resolve) {
-        var memFn = function () {
-          var args = Array.prototype.slice.call(arguments)
-          var fnaCb = args.length ? args[args.length - 1] : undefined
+        const memFn = function () {
+          const args = Array.prototype.slice.call(arguments)
+          const fnaCb = args.length ? args[args.length - 1] : undefined
 
           if (typeof fnaCb === 'function' && fnaCb.length > 0) {
             optExt.async = true
           }
 
-          var filePath = getCacheFilePathBound(fn, args, optExt)
+          const filePath = getCacheFilePathBound(fn, args, optExt)
 
           if (promiseCache[filePath]) {
             return promiseCache[filePath]
@@ -112,13 +105,13 @@ function buildMemoizer (options) {
 
           promiseCache[filePath] = new Promise(function (resolve, reject) {
             function cacheAndReturn () {
-              var result
+              let result
 
               function writeResult (r, cb) {
-                var resultObj,
-                  resultString
+                let resultObj
+                let resultString
                 if ((r && typeof r === 'object') || typeof r === 'string') {
-                  resultObj = {data: r}
+                  resultObj = { data: r }
                   resultString = serialize(resultObj)
                 } else {
                   resultString = '{"data":' + r + '}'
@@ -139,8 +132,8 @@ function buildMemoizer (options) {
                 args.pop()
 
                 args.push(function (/* err, result... */) {
-                  var cbErr = arguments[0]
-                  var cbArgs = Array.prototype.slice.call(arguments)
+                  const cbErr = arguments[0]
+                  const cbArgs = Array.prototype.slice.call(arguments)
                   cbArgs.shift()
                   if (cbErr) {
                     // if we have an exception we don't cache anything
@@ -188,7 +181,7 @@ function buildMemoizer (options) {
               return processFn()
             }
 
-            fs.readFile(filePath, {encoding: 'utf8'}, function (err, data) {
+            fs.readFile(filePath, { encoding: 'utf8' }, function (err, data) {
               if (err) {
                 return cacheAndReturn()
               }
@@ -243,7 +236,7 @@ function buildMemoizer (options) {
       if (cacheId && typeof cacheId !== 'string') {
         reject(Error('cacheId option of type string expected, got \'' + typeof cacheId + '\''))
       } else {
-        var cachPath = cacheId ? path.join(options.cachePath, cacheId) : options.cachePath
+        const cachPath = cacheId ? path.join(options.cachePath, cacheId) : options.cachePath
         rmdir(cachPath, function (err) {
           if (err) {
             reject(err)
@@ -256,20 +249,20 @@ function buildMemoizer (options) {
   }
 
   function getCacheFilePathBound (fn, args, opt) {
-    return getCacheFilePath(fn, args, Object.assign({}, opt, {cachePath: options.cachePath}))
+    return getCacheFilePath(fn, args, Object.assign({}, opt, { cachePath: options.cachePath }))
   }
 
-  var cache = initCache(options.cachePath)
+  const cache = initCache(options.cachePath)
 
   return {
-    'fn': function (fn, opt) {
+    fn: function (fn, opt) {
       return cache.then(function () {
         return memoizeFn(fn, opt)
       }, function (err) {
         throw err
       })
     },
-    'getCacheFilePath': getCacheFilePathBound,
-    'invalidate': invalidateCache
+    getCacheFilePath: getCacheFilePathBound,
+    invalidate: invalidateCache
   }
 }
