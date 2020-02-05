@@ -1,12 +1,16 @@
-const mkdirp = require('mkdirp')
-const fs = require('fs')
+// const mkdirp = require('mkdirp')
 const path = require('path')
-const rmdir = require('rimraf')
 const crypto = require('crypto')
 const meriyah = require('meriyah')
+const fs = require('fs-extra')
 
 module.exports = buildMemoizer
 module.exports.getCacheFilePath = getCacheFilePath
+
+const serializer = {
+  serialize,
+  deserialize
+}
 
 function serialize (val) {
   const circRefColl = []
@@ -26,6 +30,10 @@ function serialize (val) {
   })
 }
 
+function deserialize (...args) {
+  return JSON.parse(...args)
+}
+
 function getCacheFilePath (fn, args, opt) {
   const salt = opt.salt || ''
   let fnStr = ''
@@ -36,7 +44,8 @@ function getCacheFilePath (fn, args, opt) {
     }
     fnStr = opt.astBody ? JSON.stringify(fnStr) : fnStr
   }
-  const argsStr = serialize(args)
+
+  const argsStr = (opt.serialize || serialize)(args)
   const hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
   return path.join(opt.cachePath, opt.cacheId, hash)
 }
@@ -45,32 +54,44 @@ function buildMemoizer (options) {
   const promiseCache = {}
 
   // check args
-  if (typeof options !== 'object') {
+  if (!options || (options && typeof options !== 'object')) {
     throw new Error('options of type object expected')
   }
   if (typeof options.cachePath !== 'string') {
     throw new Error('option cachePath of type string expected')
   }
+  options = { ...serializer, ...options }
 
   // check for existing cache folder, if not found, create folder, then resolve
   function initCache (cachePath) {
     return new Promise(function (resolve, reject) {
-      return mkdirp(cachePath).then(() => {
-        resolve()
-      }).catch(reject)
+      return fs.ensureDir(cachePath, { recursive: true })
+        .then(() => {
+          resolve()
+        })
+        .catch((err) => {
+          // ! NOTE we should handle this case, intentionally;
+          // ! But it fails one test: should throw an error when trying to memoize
+          // ! a function with an invalid combination of cache path and cache id
+          // if (err && err.code === 'EEXIST') {
+          //   resolve()
+          //   return
+          // }
+          reject(err)
+        })
     })
   }
 
   function memoizeFn (fn, opt) {
     function checkOptions (optExt) {
       if (optExt.salt && typeof optExt.salt !== 'string') {
-        throw new Error('salt option of type string expected, got \'' + typeof optExt.salt + '\'')
+        throw new TypeError('salt option of type string expected, got: ' + typeof optExt.salt)
       }
       if (optExt.cacheId && typeof optExt.cacheId !== 'string') {
-        throw new Error('cacheId option of type string expected, got \'' + typeof optExt.cacheId + '\'')
+        throw new TypeError('cacheId option of type string expected, got: ' + typeof optExt.cacheId)
       }
       if (optExt.maxAge && typeof optExt.maxAge !== 'number') {
-        throw new Error('maxAge option of type number bigger zero expected')
+        throw new TypeError('maxAge option of type number bigger zero expected')
       }
     }
 
@@ -78,14 +99,21 @@ function buildMemoizer (options) {
       throw new Error('opt of type object expected, got \'' + typeof opt + '\'')
     }
 
-    const optExt = opt || {}
-
     if (typeof fn !== 'function') {
       throw new Error('fn of type function expected')
     }
+
+    const optExt = { ...serializer, ...options, ...opt }
     checkOptions(optExt)
 
     optExt.cacheId = optExt.cacheId || './'
+
+    // NOTE weird stuf... I don't get why it's not in optExt in some cases... so istanbul ignore
+
+    /* istanbul ignore next */
+    optExt.serialize = typeof optExt.serialize === 'function' ? optExt.serialize : serialize
+    /* istanbul ignore next */
+    optExt.deserialize = typeof optExt.deserialize === 'function' ? optExt.deserialize : deserialize
 
     function resolveWithMemFn () {
       return new Promise(function (resolve) {
@@ -112,7 +140,7 @@ function buildMemoizer (options) {
                 let resultString
                 if ((r && typeof r === 'object') || typeof r === 'string') {
                   resultObj = { data: r }
-                  resultString = serialize(resultObj)
+                  resultString = optExt.serialize(resultObj)
                 } else {
                   resultString = '{"data":' + r + '}'
                 }
@@ -153,7 +181,7 @@ function buildMemoizer (options) {
                 } catch (e) {
                   return reject(e)
                 }
-                if (result && result.then && typeof result.then === 'function') {
+                if (result && typeof result.then === 'function') {
                   // result is a promise instance
                   return result.then(function (retObj) {
                     writeResult(retObj, function () {
@@ -186,9 +214,21 @@ function buildMemoizer (options) {
                 return cacheAndReturn()
               }
 
+              function hasOwn (obj, key) {
+                return Object.prototype.hasOwnProperty.call(obj, key)
+              }
+
               function parseResult (resultString) {
                 try {
-                  return JSON.parse(resultString).data // will fail on NaN
+                  const deserializedValue = optExt.deserialize(resultString)
+
+                  // NOTE not needed to be tested it's simple feature
+                  // allowing users with custom serialize/deserialize
+                  // to not need to return { data: they result}, but instead directly their result
+                  /* istanbul ignore next */
+                  return hasOwn(deserializedValue, 'data')
+                    ? deserializedValue.data
+                    : deserializedValue
                 } catch (e) {
                   return undefined
                 }
@@ -237,13 +277,9 @@ function buildMemoizer (options) {
         reject(Error('cacheId option of type string expected, got \'' + typeof cacheId + '\''))
       } else {
         const cachPath = cacheId ? path.join(options.cachePath, cacheId) : options.cachePath
-        rmdir(cachPath, function (err) {
-          if (err) {
-            reject(err)
-          } else {
-            resolve()
-          }
-        })
+        fs.remove(cachPath)
+          .then(resolve)
+          .catch(reject)
       }
     })
   }

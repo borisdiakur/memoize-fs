@@ -2,15 +2,15 @@
 /* global describe, beforeEach, it */
 /* eslint no-useless-escape: 0, object-curly-spacing: 0 */
 
-const assert = require('assert')
-const fs = require('fs')
 const path = require('path')
-const rmdir = require('rimraf')
-const memoizeFs = require('../index.js')
+const assert = require('assert')
+const fs = require('fs-extra')
+const serializer = require('node-serialize')
+const memoizeFs = require('../index')
 
 describe('memoize-fs', function () {
   beforeEach(function (done) {
-    rmdir(path.join(__dirname, '../build/cache'), done)
+    fs.remove(path.join(__dirname, '../build/cache')).then(() => done()).catch(done)
   })
 
   describe('check args', function () {
@@ -77,6 +77,52 @@ describe('memoize-fs', function () {
       }, function (err) {
         done(err)
       })
+    })
+
+    it('should be able to pass custom serialize and deserialize through memoizeFS options', (done) => {
+      const cachePath = path.join(__dirname, '../build/cache')
+      fs.removeSync(cachePath)
+
+      const {serialize, unserialize: deserialize} = serializer
+      const options = {cachePath, cacheId: 'tmp', serialize, deserialize}
+
+      const memoize = memoizeFs(options)
+
+      function toBeMemoized (abc) {
+        return { abc, foo: () => { return 100 + abc } }
+      }
+
+      memoize.fn(toBeMemoized)
+        .then((memFn) => {
+          return memFn(200)
+            .then((res) => {
+              assert.strictEqual(res.abc, 200)
+              assert.strictEqual(typeof res.foo, 'function')
+
+              return memFn(400)
+            })
+            .then((res) => {
+              assert.strictEqual(res.abc, 400)
+              assert.strictEqual(typeof res.foo, 'function')
+            })
+        })
+        .then(() => {
+          const fileWith200 = memoizeFs.getCacheFilePath(toBeMemoized, [200], options)
+
+          const fileString200 = fs.readFileSync(fileWith200, 'utf8')
+          assert.ok(fileString200.includes('"abc":200,"foo":"_$$ND_FUNC$$'))
+
+          const fileWith400 = memoizeFs.getCacheFilePath(toBeMemoized, [400], options)
+          const fileString400 = fs.readFileSync(fileWith400, 'utf8')
+          assert.ok(fileString400.includes('"abc":400,"foo":"_$$ND_FUNC$$'))
+
+          fs.removeSync(cachePath)
+          done()
+        })
+        .catch((err) => {
+          fs.removeSync(cachePath)
+          done(err)
+        })
     })
 
     it('should reject with invalid cache path', function (done) {
