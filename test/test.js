@@ -5,7 +5,7 @@
 const path = require('path')
 const assert = require('assert')
 const fs = require('fs-extra')
-const serializer = require('node-serialize')
+const serialize = require('serialize-javascript')
 const memoizeFs = require('../index')
 
 describe('memoize-fs', function () {
@@ -83,7 +83,11 @@ describe('memoize-fs', function () {
       const cachePath = path.join(__dirname, '../build/cache')
       fs.removeSync(cachePath)
 
-      const {serialize, unserialize: deserialize} = serializer
+      function deserialize (serializedJavascript) {
+        // eslint-disable-next-line no-eval
+        return eval('(' + serializedJavascript + ')')
+      }
+
       const options = {cachePath, cacheId: 'tmp', serialize, deserialize}
 
       const memoize = memoizeFs(options)
