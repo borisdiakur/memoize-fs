@@ -93,7 +93,7 @@ describe('memoize-fs', function () {
       const memoize = memoizeFs(options)
 
       function toBeMemoized (abc) {
-        return { abc, foo: () => { return 100 + abc } }
+        return { abc, foo () { return 100 + abc } }
       }
 
       memoize.fn(toBeMemoized)
@@ -114,11 +114,11 @@ describe('memoize-fs', function () {
           const fileWith200 = memoizeFs.getCacheFilePath(toBeMemoized, [200], options)
 
           const fileString200 = fs.readFileSync(fileWith200, 'utf8')
-          assert.ok(fileString200.includes('"abc":200,"foo":"_$$ND_FUNC$$'))
+          assert.ok(fileString200.includes('"abc":200,"foo":function() {'))
 
           const fileWith400 = memoizeFs.getCacheFilePath(toBeMemoized, [400], options)
           const fileString400 = fs.readFileSync(fileWith400, 'utf8')
-          assert.ok(fileString400.includes('"abc":400,"foo":"_$$ND_FUNC$$'))
+          assert.ok(fileString400.includes('"abc":400,"foo":function() {'))
 
           fs.removeSync(cachePath)
           done()

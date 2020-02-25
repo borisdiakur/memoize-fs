@@ -31,7 +31,7 @@ function serialize (val) {
 }
 
 function deserialize (...args) {
-  return JSON.parse(...args)
+  return JSON.parse(...args).data
 }
 
 function getCacheFilePath (fn, args, opt) {
@@ -214,21 +214,11 @@ function buildMemoizer (options) {
                 return cacheAndReturn()
               }
 
-              function hasOwn (obj, key) {
-                return Object.prototype.hasOwnProperty.call(obj, key)
-              }
-
               function parseResult (resultString) {
                 try {
                   const deserializedValue = optExt.deserialize(resultString)
 
-                  // NOTE not needed to be tested it's simple feature
-                  // allowing users with custom serialize/deserialize
-                  // to not need to return { data: they result}, but instead directly their result
-                  /* istanbul ignore next */
-                  return hasOwn(deserializedValue, 'data')
-                    ? deserializedValue.data
-                    : deserializedValue
+                  return deserializedValue
                 } catch (e) {
                   return undefined
                 }
