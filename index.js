@@ -45,7 +45,7 @@ function getCacheFilePath (fn, args, opt) {
     fnStr = opt.astBody ? JSON.stringify(fnStr) : fnStr
   }
 
-  const argsStr = (opt.serialize || serialize)(args)
+  const argsStr = opt.serialize(args)
   const hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
   return path.join(opt.cachePath, opt.cacheId, hash)
 }
@@ -92,6 +92,12 @@ function buildMemoizer (options) {
       if (optExt.maxAge && typeof optExt.maxAge !== 'number') {
         throw new TypeError('maxAge option of type number bigger zero expected')
       }
+      if (optExt.serialize && typeof optExt.serialize !== 'function') {
+        throw new TypeError('serialize option of type function expected')
+      }
+      if (optExt.deserialize && typeof optExt.deserialize !== 'function') {
+        throw new TypeError('deserialize option of type function expected')
+      }
     }
 
     if (opt && typeof opt !== 'object') {
@@ -102,17 +108,16 @@ function buildMemoizer (options) {
       throw new Error('fn of type function expected')
     }
 
-    const optExt = { ...serializer, ...options, ...opt }
+    const optExt = { cacheId: './', ...serializer, ...options, ...opt }
+    console.log(optExt)
     checkOptions(optExt)
-
-    optExt.cacheId = optExt.cacheId || './'
 
     // NOTE weird stuf... I don't get why it's not in optExt in some cases... so istanbul ignore
 
-    /* istanbul ignore next */
-    optExt.serialize = typeof optExt.serialize === 'function' ? optExt.serialize : serialize
-    /* istanbul ignore next */
-    optExt.deserialize = typeof optExt.deserialize === 'function' ? optExt.deserialize : deserialize
+    // /* istanbul ignore next */
+    // optExt.serialize = typeof optExt.serialize === 'function' ? optExt.serialize : serialize
+    // /* istanbul ignore next */
+    // optExt.deserialize = typeof optExt.deserialize === 'function' ? optExt.deserialize : deserialize
 
     function resolveWithMemFn () {
       return new Promise(function (resolve) {
