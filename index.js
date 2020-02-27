@@ -63,20 +63,19 @@ function buildMemoizer (options) {
   options = { ...serializer, ...options }
 
   // check for existing cache folder, if not found, create folder, then resolve
-  function initCache (cachePath) {
+  function initCache (cachePath, opts) {
     return new Promise(function (resolve, reject) {
       return fs.ensureDir(cachePath, { recursive: true })
         .then(() => {
           resolve()
         })
         .catch((err) => {
-          // ! NOTE we should handle this case, intentionally;
-          // ! But it fails one test: should throw an error when trying to memoize
-          // ! a function with an invalid combination of cache path and cache id
-          // if (err && err.code === 'EEXIST') {
-          //   resolve()
-          //   return
-          // }
+          // ! NOTE we don't care in this case if there is a problem,
+          // since we just need a cache directory to be created
+          if (err && err.code === 'EEXIST' && opts.throwError === false) {
+            resolve()
+            return
+          }
           reject(err)
         })
     })
@@ -258,7 +257,7 @@ function buildMemoizer (options) {
       })
     }
 
-    return initCache(path.join(options.cachePath, optExt.cacheId)).then(resolveWithMemFn)
+    return initCache(path.join(options.cachePath, optExt.cacheId), optExt).then(resolveWithMemFn)
   }
 
   function invalidateCache (cacheId) {

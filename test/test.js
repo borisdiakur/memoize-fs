@@ -712,7 +712,7 @@ describe('memoize-fs', function () {
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function (cb) {
         setTimeout(function () {
-          cb(new Error('qux'))
+          cb(new Error('fake error'))
         }, 100)
       }, {cacheId: 'foobar'}).then(function (memFn) {
         memFn(function (err) { // eslint-disable-line handle-callback-err
@@ -1224,6 +1224,18 @@ describe('memoize-fs', function () {
         done(Error('entered resolve handler instead of error handler'))
       }, function (err) {
         assert.ok(err)
+        done()
+      })
+    })
+
+    it('should NOT throw error if cache dir exists and opts.throwError is `false`', (done) => {
+      const cachePath = path.join(__dirname, '..')
+      const memoize = memoizeFs({cachePath: cachePath, throwError: false})
+      memoize.fn(function () {
+      }, {cacheId: 'README.md'}).then(function () {
+        done()
+      }, function (err) {
+        assert.ok(!err)
         done()
       })
     })
