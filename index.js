@@ -1,4 +1,5 @@
-// const mkdirp = require('mkdirp')
+'use strict'
+
 const path = require('path')
 const crypto = require('crypto')
 const meriyah = require('meriyah')
@@ -91,8 +92,6 @@ function buildMemoizer (options) {
           resolve()
         })
         .catch((err) => {
-          // ! NOTE we don't care in this case if there is a problem,
-          // since we just need a cache directory to be created
           if (err && err.code === 'EEXIST' && opts.throwError === false) {
             resolve()
             return
