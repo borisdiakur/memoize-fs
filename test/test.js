@@ -1234,9 +1234,8 @@ describe('memoize-fs', function () {
       memoize.fn(function () {
       }, {cacheId: 'README.md'}).then(function () {
         done()
-      }, function (err) {
-        assert.ok(!err)
-        done()
+      }).catch(function () {
+        done(new Error('throws unexpected error'))
       })
     })
 
