@@ -35,19 +35,21 @@ function deserialize (...args) {
 }
 
 function getCacheFilePath (fn, args, opt) {
-  const salt = opt.salt || ''
+  const options = { ...serializer, ...opt }
+  const salt = options.salt || ''
   let fnStr = ''
-  if (!opt.noBody) {
+  if (!options.noBody) {
     fnStr = String(fn)
-    if (opt.astBody) {
+    if (options.astBody) {
       fnStr = meriyah.parse(fnStr, { jsx: true, next: true })
     }
-    fnStr = opt.astBody ? JSON.stringify(fnStr) : fnStr
+    fnStr = options.astBody ? JSON.stringify(fnStr) : fnStr
   }
 
-  const argsStr = opt.serialize(args)
+  const argsStr = options.serialize(args)
   const hash = crypto.createHash('md5').update(fnStr + argsStr + salt).digest('hex')
-  return path.join(opt.cachePath, opt.cacheId, hash)
+
+  return path.join(options.cachePath, options.cacheId, hash)
 }
 
 function buildMemoizer (options) {
@@ -61,6 +63,25 @@ function buildMemoizer (options) {
     throw new Error('option cachePath of type string expected')
   }
   options = { ...serializer, ...options }
+  checkOptions(options)
+
+  function checkOptions (opts) {
+    if (opts.salt && typeof opts.salt !== 'string') {
+      throw new TypeError('salt option of type string expected, got: ' + typeof opts.salt)
+    }
+    if (opts.cacheId && typeof opts.cacheId !== 'string') {
+      throw new TypeError('cacheId option of type string expected, got: ' + typeof opts.cacheId)
+    }
+    if (opts.maxAge && typeof opts.maxAge !== 'number') {
+      throw new TypeError('maxAge option of type number bigger zero expected')
+    }
+    if (opts.serialize && typeof opts.serialize !== 'function') {
+      throw new TypeError('serialize option of type function expected')
+    }
+    if (opts.deserialize && typeof opts.deserialize !== 'function') {
+      throw new TypeError('deserialize option of type function expected')
+    }
+  }
 
   // check for existing cache folder, if not found, create folder, then resolve
   function initCache (cachePath, opts) {
@@ -82,24 +103,6 @@ function buildMemoizer (options) {
   }
 
   function memoizeFn (fn, opt) {
-    function checkOptions (optExt) {
-      if (optExt.salt && typeof optExt.salt !== 'string') {
-        throw new TypeError('salt option of type string expected, got: ' + typeof optExt.salt)
-      }
-      if (optExt.cacheId && typeof optExt.cacheId !== 'string') {
-        throw new TypeError('cacheId option of type string expected, got: ' + typeof optExt.cacheId)
-      }
-      if (optExt.maxAge && typeof optExt.maxAge !== 'number') {
-        throw new TypeError('maxAge option of type number bigger zero expected')
-      }
-      if (optExt.serialize && typeof optExt.serialize !== 'function') {
-        throw new TypeError('serialize option of type function expected')
-      }
-      if (optExt.deserialize && typeof optExt.deserialize !== 'function') {
-        throw new TypeError('deserialize option of type function expected')
-      }
-    }
-
     if (opt && typeof opt !== 'object') {
       throw new Error('opt of type object expected, got \'' + typeof opt + '\'')
     }
@@ -108,16 +111,8 @@ function buildMemoizer (options) {
       throw new Error('fn of type function expected')
     }
 
-    const optExt = { cacheId: './', ...serializer, ...options, ...opt }
-    console.log(optExt)
+    const optExt = { cacheId: './', ...options, ...opt }
     checkOptions(optExt)
-
-    // NOTE weird stuf... I don't get why it's not in optExt in some cases... so istanbul ignore
-
-    // /* istanbul ignore next */
-    // optExt.serialize = typeof optExt.serialize === 'function' ? optExt.serialize : serialize
-    // /* istanbul ignore next */
-    // optExt.deserialize = typeof optExt.deserialize === 'function' ? optExt.deserialize : deserialize
 
     function resolveWithMemFn () {
       return new Promise(function (resolve) {
@@ -279,7 +274,7 @@ function buildMemoizer (options) {
   }
 
   function getCacheFilePathBound (fn, args, opt) {
-    return getCacheFilePath(fn, args, Object.assign({}, opt, { cachePath: options.cachePath }))
+    return getCacheFilePath(fn, args, { ...options, ...opt, cachePath: options.cachePath })
   }
 
   const cache = initCache(options.cachePath)

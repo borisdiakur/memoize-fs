@@ -14,6 +14,18 @@ describe('memoize-fs', function () {
   })
 
   describe('check args', function () {
+    it('should throw an error when opts.serialize is not a function when passed', (done) => {
+      const fixture = () => memoizeFs(() => {}, {deserialize: 123})
+      assert.throws(fixture, Error)
+      assert.throws(fixture, /serialize option of type function expected/)
+      done()
+    })
+    it('should throw an error when opts.deserialize is not a function when passed', (done) => {
+      const fixture = () => memoizeFs(() => {}, {deserialize: 123})
+      assert.throws(fixture, Error)
+      assert.throws(fixture, /deserialize option of type function expected/)
+      done()
+    })
     it('should throw an error when options param is not provided', function (done) {
       assert.throws(function () {
         memoizeFs()
@@ -924,7 +936,7 @@ describe('memoize-fs', function () {
         return a + b + c
       }, {
         cacheId: 'foobar',
-        serialize: 'qux',
+        salt: 'qux',
         noBody: true
       }).then(function (memFn) {
         return memFn(1, 2)
@@ -934,7 +946,7 @@ describe('memoize-fs', function () {
           return a + b + c
         }, {
           cacheId: 'foobar',
-          serialize: 'qux',
+          salt: 'qux',
           noBody: true
         })
       }).then(function (memFn) {
@@ -961,7 +973,7 @@ describe('memoize-fs', function () {
         return a + b + c
       }, {
         cacheId: 'foobar',
-        serialize: 'qux'
+        salt: 'qux'
       }).then(function (memFn) {
         return memFn(1, 2)
       }).then(function (result) {
@@ -970,7 +982,7 @@ describe('memoize-fs', function () {
           return a + b + c
         }, {
           cacheId: 'foobar',
-          serialize: 'qux'
+          salt: 'qux'
         })
       }).then(function (memFn) {
         c = 999
@@ -998,7 +1010,7 @@ describe('memoize-fs', function () {
         return "string" // eslint-disable-line quotes
       }, {
         cacheId: 'foobar',
-        serialize: 'qux',
+        salt: 'qux',
         astBody: true
       }).then(function (memFn) {
         return memFn()
@@ -1009,7 +1021,7 @@ describe('memoize-fs', function () {
           return 'string'
         }, {
           cacheId: 'foobar',
-          serialize: 'qux',
+          salt: 'qux',
           astBody: true
         })
       }).then(function (memFn) {
