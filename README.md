@@ -222,11 +222,13 @@ Issues and Pull-requests are absolutely welcome. If you want to submit a patch, 
 many people contributed. — [idiomatic.js](https://github.com/rwldrn/idiomatic.js/)
 
 Lint with:
+
 ```shell
-npm run jshint
+npm run lint
 ```
 
 Test with:
+
 ```shell
 npm run mocha
 ```
@@ -234,7 +236,7 @@ npm run mocha
 Check code coverage with:
 
 ```shell
-npm run istanbul
+npm run coverage
 ```
 
 Then please commit with a __detailed__ commit message.

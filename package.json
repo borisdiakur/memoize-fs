@@ -6,10 +6,10 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "mocha --reporter nyan test",
-    "cov": "nyc mocha",
-    "istanbul": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report html && open coverage/memoize-fs/index.js.html",
-    "coveralls": "rm -rf coverage && ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "test": "nyc mocha",
+    "mocha": "mocha -R nyan",
+    "coverage": "nyc report | coveralls",
+    "cov": "open-cli coverage/lcov-report/index.html"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
   "bugs": {
@@ -35,9 +35,9 @@
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "istanbul": "^0.4.5",
-    "mocha": "^7.0.1",
-    "mocha-lcov-reporter": "1.3.0",
+    "mocha": "^7.1.0",
+    "nyc": "^15.0.0",
+    "open-cli": "^5.0.0",
     "serialize-javascript": "^3.0.0"
   },
   "private": false,
@@ -58,5 +58,18 @@
     "fs"
   ],
   "license": "MIT",
-  "readmeFilename": "README.md"
+  "nyc": {
+    "exclude": [
+      "test"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ],
+    "check-coverage": true,
+    "branches": 80,
+    "lines": 80,
+    "functions": 80,
+    "statements": 80
+  }
 }
