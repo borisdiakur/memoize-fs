@@ -31,8 +31,8 @@ function serialize (val) {
   })
 }
 
-function deserialize (...args) {
-  return JSON.parse(...args).data
+function deserialize (str) {
+  return JSON.parse(str).data
 }
 
 function getCacheFilePath (fn, args, opt) {
