@@ -27,7 +27,7 @@ describe('memoize-fs', function () {
     })
     it('should throw an error when opts.deserialize is not a function when passed', (done) => {
       const fixture = () => {
-        memoizeFs({cachePath: FIXTURE_CACHE}).fn(() => {}, {deserialize: 123})
+        memoizeFs({cachePath: FIXTURE_CACHE, deserialize: 123}).fn(() => {})
       }
 
       assert.throws(fixture, Error)
