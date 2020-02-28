@@ -8,20 +8,28 @@ const fs = require('fs-extra')
 const serialize = require('serialize-javascript')
 const memoizeFs = require('../index')
 
+const FIXTURE_CACHE = path.join(__dirname, '..', 'fixture-cache')
+
 describe('memoize-fs', function () {
   beforeEach(function (done) {
-    fs.remove(path.join(__dirname, '../build/cache')).then(() => done()).catch(done)
+    fs.remove(FIXTURE_CACHE).then(() => done()).catch(done)
   })
 
   describe('check args', function () {
     it('should throw an error when opts.serialize is not a function when passed', (done) => {
-      const fixture = () => memoizeFs(() => {}, {deserialize: 123})
+      const fixture = () => {
+        memoizeFs({cachePath: FIXTURE_CACHE, serialize: 123}).fn(() => {})
+      }
+
       assert.throws(fixture, Error)
       assert.throws(fixture, /serialize option of type function expected/)
       done()
     })
     it('should throw an error when opts.deserialize is not a function when passed', (done) => {
-      const fixture = () => memoizeFs(() => {}, {deserialize: 123})
+      const fixture = () => {
+        memoizeFs({cachePath: FIXTURE_CACHE, deserialize: 123}).fn(() => {})
+      }
+
       assert.throws(fixture, Error)
       assert.throws(fixture, /deserialize option of type function expected/)
       done()
@@ -64,7 +72,7 @@ describe('memoize-fs', function () {
 
   describe('init cache', function () {
     it('should create a cache folder before caching', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }).then(function (memoized) {
@@ -77,7 +85,7 @@ describe('memoize-fs', function () {
     })
 
     it('should create a cache sub-folder before caching', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }, {cacheId: 'foobar'}).then(function (memoized) {
@@ -92,7 +100,7 @@ describe('memoize-fs', function () {
     })
 
     it('should be able to pass custom serialize and deserialize through memoizeFS options', (done) => {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       fs.removeSync(cachePath)
 
       function deserialize (serializedJavascript) {
@@ -156,7 +164,7 @@ describe('memoize-fs', function () {
 
   describe('memoize fn', function () {
     it('should return a rejecting promise instance if fn param is not provided', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn().then(function () {
         done(Error('entered resolve handler instead of error handler'))
@@ -167,7 +175,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return a rejecting promise instance if fn param is not of type function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn('foobar').then(function () {
         done(Error('entered resolve handler instead of error handler'))
@@ -178,7 +186,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return a rejecting promise instance if salt param is not of type string', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }, {salt: true}).then(function () {
@@ -190,7 +198,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return a rejecting promise instance if cacheId param is not of type string', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }, {cacheId: true}).then(function () {
@@ -202,7 +210,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return a rejecting promise instance if maxAge param is not of type number', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }, {maxAge: true}).then(function () {
@@ -216,7 +224,7 @@ describe('memoize-fs', function () {
 
   describe('process fn', function () {
     it('should not cache the result of a memoized function if an exception is raised during execution', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
         throw new Error('qux')
@@ -238,7 +246,7 @@ describe('memoize-fs', function () {
     })
 
     it('should not cache the result of a memoized promisified function if an exception is raised during execution', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
         return new Promise(function (resolve, reject) {
@@ -264,7 +272,7 @@ describe('memoize-fs', function () {
     })
 
     it('should cache the result of a memoized function on first execution to its cache folder', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -289,7 +297,7 @@ describe('memoize-fs', function () {
     })
 
     it('should cache the result of a memoized function on first execution to its cache folder with salt', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -317,7 +325,7 @@ describe('memoize-fs', function () {
     })
 
     it('should cache the result of a memoized function on first execution to the root cache folder if no cache id is provided', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       const c = 3
       memoize.fn(function (a, b) {
@@ -338,7 +346,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result with the value undefined of a previously memoized function with return type void', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 0
       memoize.fn(function () {
@@ -364,7 +372,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of type number of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -389,7 +397,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of type number of a previously memoized function cached in the root cache folder if no cache id is provided', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -414,7 +422,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of type string of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -439,7 +447,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of type string with lots of quotation marks in it of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function (a, b) {
         return '"{"foo": "bar", "qux": "\'sas\'\"quatch\""}"' + (a + b)
@@ -462,7 +470,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result with the value undefined of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c
       memoize.fn(function (a, b) {
@@ -487,7 +495,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result with the value null of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = null
       memoize.fn(function (a, b) {
@@ -512,7 +520,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result with the value NaN of a previously memoized function converting NaN to undefined', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c
       memoize.fn(function (a, b) {
@@ -537,7 +545,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of type object of a previously memoized function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       const Circ = function () {
@@ -612,7 +620,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of a previously memoized promisified async function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -641,7 +649,7 @@ describe('memoize-fs', function () {
     })
 
     it('should ignore arguments of type function silently during serialization', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let d = 3
       memoize.fn(function (a, b, c) {
@@ -670,7 +678,7 @@ describe('memoize-fs', function () {
     })
 
     it('should ignore argument attributes of type function silently during serialization', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let d = 3
       memoize.fn(function (a, b, c) {
@@ -705,7 +713,7 @@ describe('memoize-fs', function () {
 
   describe('async', function () {
     it('should return a rejecting promise instance if option async is provided but function has no callback', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function (a, cb) {
         cb(a)
@@ -720,7 +728,7 @@ describe('memoize-fs', function () {
     })
 
     it('should not cache the result of a memoized async function if its callback receives an error', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function (cb) {
         setTimeout(function () {
@@ -745,7 +753,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of a previously memoized async function', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       let d
@@ -784,7 +792,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of a previously memoized async function with a callback which only excepts an error argument', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = true
       let d
@@ -821,7 +829,7 @@ describe('memoize-fs', function () {
     })
 
     it('should return the cached result of a previously memoized async function which only excepts a callback argument', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = true
       let d
@@ -858,7 +866,7 @@ describe('memoize-fs', function () {
     })
 
     it('should only run the memoized function once even when called with the same arguments on the same tick', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let n = 0
       memoize.fn(function (cb) {
@@ -874,7 +882,7 @@ describe('memoize-fs', function () {
 
   describe('force recaching', function () {
     it('should not recache the result of a memoized function on second execution if force option is not set', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({ cachePath: cachePath })
       let c = 3
       memoize.fn(function (a, b) { return a + b + c }, { cacheId: 'foobar' }).then(function (memFn) {
@@ -899,7 +907,7 @@ describe('memoize-fs', function () {
     })
 
     it('should recache the result of a memoized function on second execution if force option is set', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) { return a + b + c }, {cacheId: 'foobar'}).then(function (memFn) {
@@ -929,7 +937,7 @@ describe('memoize-fs', function () {
 
   describe('noBody', function () {
     it('should cache the result of a memoized function on second execution with option noBody set to true with different function names', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function foo (a, b) {
@@ -966,7 +974,7 @@ describe('memoize-fs', function () {
     })
 
     it('should not cache the result of a memoized function on second execution with option noBody not set with different function names', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function foo (a, b) {
@@ -1003,7 +1011,7 @@ describe('memoize-fs', function () {
 
   describe('astBody', function () {
     it('should cache the result of a memoized function on second execution with option astBody set to true with equivalent function ASTs', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function foo () {
         // double quoted
@@ -1039,7 +1047,7 @@ describe('memoize-fs', function () {
       }).catch(done)
     })
     it('should work with ES2020', async () => {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let idx = 0
 
@@ -1078,7 +1086,7 @@ describe('memoize-fs', function () {
 
   describe('invalidate cache', function () {
     it('should recache the result of a memoized function after invalidating the cache before the second execution', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -1109,7 +1117,7 @@ describe('memoize-fs', function () {
     })
 
     it('should recache the result of a memoized function after invalidating the root cache by not providing a cache id before the second execution', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -1147,7 +1155,7 @@ describe('memoize-fs', function () {
     })
 
     it('should invalidate cache after timeout with maxAge option set', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -1181,7 +1189,7 @@ describe('memoize-fs', function () {
     })
 
     it('should not throw if it fails to invalidate cache after timeout with maxAge option set, because already invalidated manually', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       let c = 3
       memoize.fn(function (a, b) {
@@ -1252,7 +1260,7 @@ describe('memoize-fs', function () {
     })
 
     it('should throw an error when trying to write cache on a file without having the necessary permission', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () { return 1 }, {cacheId: 'foobar'}).then(function (memFn) {
         return memFn()
@@ -1275,7 +1283,7 @@ describe('memoize-fs', function () {
     })
 
     it('should throw an error trying to invalidate cache without having the necessary permission', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
         return 1
@@ -1304,7 +1312,7 @@ describe('memoize-fs', function () {
     })
 
     it('should throw an error when trying to memoize a function with options of invalid type', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       memoize.fn(function () {
       }, true).then(function () {
@@ -1316,7 +1324,7 @@ describe('memoize-fs', function () {
     })
 
     it('should throw if it fails to invalidate cache after timeout with maxAge option set, because of EPERM error', function (done) {
-      const cachePath = path.join(__dirname, '../build/cache')
+      const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({cachePath: cachePath})
       const c = 3
 
