@@ -1,6 +1,6 @@
 # memoize-fs
 
-memoize/cache in file system solution for Node.js
+Node.js solution for memoizing/caching a function and its return state into the file system
 
 [![Build Status](https://travis-ci.org/borisdiakur/memoize-fs.svg?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
 [![Coverage Status](https://coveralls.io/repos/borisdiakur/memoize-fs/badge.svg?branch=master)](https://coveralls.io/r/borisdiakur/memoize-fs?branch=master)
@@ -32,30 +32,70 @@ npm install memoize-fs --save
 
 ## Usage
 
-```javascript
-var cachePath = require('path').join(__dirname, '..', 'cache'),
-    memoize = require('memoize-fs')({ cachePath: cachePath }),
-    fun = function (a, b) { return a + b; };
+```js
+const assert = require('assert')
+const memoizeFs = require('memoize-fs')
 
-memoize.fn(fun).then(function (memFn) {
-    memFn(1, 2).then(function (result) {
-        assert.strictEqual(result, 3);
-        return memFn(1, 2); // cache hit
-    }).then(function (result) {
-        assert.strictEqual(result, 3);
-    }).catch( /* handle error */ );
-}).catch( /* handle error */ );
+const memoizer = memoizeFs({ cachePath: './some-cache' })
+
+console.log(memoizer)
+// => {
+//   fn: [Function: fn],
+//   getCacheFilePath: [Function: getCacheFilePathBound],
+//   invalidate: [Function: invalidateCache]
+// }
+
+async function main () {
+  let idx = 0
+  const func = function foo (a, b) {
+    idx += a + b
+    return idx
+  }
+
+  const memoizedFn = await memoizer.fn(func)
+  const resultOne = await memoizedFn(1, 2)
+
+  assert.strictEqual(resultOne, 3)
+  assert.strictEqual(idx, 3)
+
+  const resultTwo = await memoizedFn(1, 2) // cache hit
+  assert.strictEqual(resultTwo, 3)
+  assert.strictEqual(idx, 3)
+}
+
+main().catch(console.error)
 ```
 
-__Note that a result of a memoized function is always a [Promise](http://www.html5rocks.com/en/tutorials/es6/promises/) instance!__
+_**NOTE:** that memoized function is always an async function and
+the result of it is a Promise (if not `await`-ed as seen in above example)!_
 
-### Memoizing asynchronous functions
+- [Learn more about Promises](https://javascript.info/promise-basics)
+- [Learn more about async/await](https://javascript.info/async-await)
+
+### Signature
+
+See [Types](#types) and [Options](#options) sections for more info.
+
+```js
+const memoizer = memoizeFs(MemoizeOptions)
+
+console.log(memoizer)
+// => {
+//   fn: [Function: fn],
+//   getCacheFilePath: [Function: getCacheFilePathBound],
+//   invalidate: [Function: invalidateCache]
+// }
+
+const memoizedFn = memoizer.fn(FunctionToMemoize, Options?)
+```
+
+## Memoizing asynchronous functions
 
 memoize-fs assumes a function asynchronous if the last argument it accepts is of type `function` and that function itself accepts at least one argument.
 So basically you don't have to do anything differently than when memoizing synchronous functions. Just make sure the above condition is fulfilled.
 Here is an example of memoizing a function with a callback:
 
-```javascript
+```js
 var funAsync = function (a, b, cb) {
     setTimeout(function () {
         cb(null, a + b);
@@ -71,7 +111,7 @@ memoize.fn(funAsync).then(function (memFn) {
 }).catch( /* handle error */ );
 ```
 
-### Memoizing promisified functions
+## Memoizing promisified functions
 
 You can also memoize a promisified function. memoize-fs assumes a function promisified if its result is _thenable_
 which means that the result is an object with a property `then` of type `function`
@@ -79,7 +119,7 @@ which means that the result is an object with a property `then` of type `functio
 So again it's the same as with memoizing synchronous functions.
 Here is an example of memoizing a promisified function:
 
-```javascript
+```js
 var funPromisified = function (a, b) {
     return new Promise(function (resolve, reject) {
         setTimeout(function () { resolve(a + b); }, 100);
@@ -96,83 +136,150 @@ memoize.fn(funPromisified).then(function (memFn) {
 }).catch( /* handle error */ );
 ```
 
-### Options
+## Types
+
+```ts
+export interface Options {
+  cacheId?: string;
+  salt?: string;
+  maxAge?: number;
+  force?: boolean;
+  astBody?: boolean;
+  noBody?: boolean;
+  serialize?: (val?: any) => string;
+  deserialize?: (val?: string) => any;
+}
+
+export type MemoizeOptions = Options & { cachePath: string };
+export type FnToMemoize = (...args: any[]) => any;
+
+export interface Memoizer {
+  fn: (fnToMemoize: FunctionToMemoize, options?: Options) => Promise<FunctionToMemoize>;
+  invalidate: (id?: string) => Promise<any>;
+  getCacheFilePath: (fnToMemoize: FunctionToMemoize, options: Options) => string;
+}
+
+declare function memoizeFs(options: MemoizeOptions): Memoizer;
+
+export = memoizeFs;
+```
+
+## Options
 
 When memoizing a function all below options can be applied in any combination.
+The only required option is `cachePath`.
 
-#### cacheId
+
+### cachePath
+
+Path to the location of the cache on the disk. This option is always **required**.
+
+### cacheId
 
 By default all cache files are saved into the __root cache__ which is the folder specified by the cachePath option:
 
-```javascript
-var memoize = require('memoize-fs')({ cachePath: require('path').join(__dirname, '../../cache' });
+```js
+var path = require('path')
+var memoizer = require('memoize-fs')({ cachePath: path.join(__dirname, '../../cache') })
 ```
 
 The `cacheId` option which you can specify during memoization of a function resolves to the name of a subfolder created inside the root cache folder.
 Cached function calls will be cached inside that folder:
 
-```javascript
-memoize.fn(fun, { cacheId: 'foobar' }).then(...
+```js
+memoizer.fn(fnToMemoize, { cacheId: 'foobar' })
 ```
 
-#### salt
+### salt
 
 Functions may have references to variables outside their own scope. As a consequence two functions which look exactly the same
 (they have the same function signature and function body) can return different results even when executed with identical arguments.
 In order to avoid the same cache being used for two different functions you can use the `salt` option
 which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
-```javascript
-memoize.fn(fun, { salt: 'foobar' }).then(...
+```js
+memoizer.fn(fnToMemoize, { salt: 'foobar' })
 ```
 
-#### maxAge
+### maxAge
 
 With `maxAge` option you can ensure that cache for given call is cleared after a predefined period of time (in milliseconds).
 
-```javascript
-memoize.fn(fun, { maxAge: 10000 }).then(...
+```js
+memoizer.fn(fnToMemoize, { maxAge: 10000 })
 ```
 
-#### force
+### force
 
 The `force` option forces the re-execution of an already memoized function and the re-caching of its outcome:
 
-```javascript
-memoize.fn(fun, { force: true }).then(...
+```js
+memoizer.fn(fnToMemoize, { force: true })
 ```
 
-#### astBody
+### astBody
 
 If you want to use the function AST instead the function body when generating the hash ([see serialization](#serialization)), set the option `astBody` to `true`. This allows the function source code to be reformatted without busting the cache. See https://github.com/borisdiakur/memoize-fs/issues/6 for details.
 
-```javascript
-memoize.fn(fun, { astBody: true }).then(...
+```js
+memoizer.fn(fnToMemoize, { astBody: true })
 ```
 
-#### noBody
+### noBody
 
 If for some reason you want to omit the function body when generating the hash ([see serialization](#serialization)), set the option `noBody` to `true`.
 
-```javascript
-memoize.fn(fun, { noBody: true }).then(...
+```js
+memoizer.fn(fnToMemoize, { noBody: true })
 ```
 
-### Manual cache invalidation
+### serialize and deserialize
+
+These two options allows you to control how the serialization and deserialization process works.
+By default we use basic `JSON.stringify` and `JSON.parse`, but you may need more advanced stuff.
+
+In the following example we are using [Yahoo's `serialize-javascript`](https://ghub.now.sh/serialize-javascript)
+to be able to cache properly the return result of memoized function containing a `function`.
+
+```js
+const memoizeFs = require('memoize-fs')
+const serialize = require('serialize-javascript')
+
+const deserialize = (serializedJsString) => eval(`(${serializedJsString})`)
+
+const memoizer = memoizeFs({ cachePath: './cache', serialize, deserialize })
+
+function someFn (a) {
+  const bar = 123
+
+  setTimeout(() => {}, a * 10)
+
+  return {
+    bar,
+    getBar() { return a + bar }
+  }
+}
+
+memoizer.fn(someFn)
+```
+
+## Manual cache invalidation
 
 You can delete the root cache (all cache files inside the folder specified by the cachePath option):
 
-```javascript
-memoize.invalidate().then(...
+```js
+memoizer.invalidate().then(() => { console.log('cache cleared') })
 ```
 
 You can also pass the cacheId argument to the invalidate method. This way you only delete the cache inside the subfolder with given id.
 
-```javascript
-memoize.invalidate('foobar').then(...
+```js
+memoizer.invalidate('foobar').then(() => { console.log('cache for "foobar" cleared') })
 ```
 
 ## Serialization
+
+See also the [`options.seriliaze` and `options.deserialize`](#serialize-and-deserialize).
 
 memoize-fs uses JSON to serialize the results of a memoized function.
 It also uses JSON, when it tries to serialize the arguments of the memoized function in order to create a hash
@@ -182,9 +289,9 @@ The hash is created from the serialized arguments, the function body and the [sa
 You can generate this hash using `memoize.getCacheFilePath`:
 
 ```js
-var memoize = require('memoize-fs')({cachePath: '/'})
-memoize.getCacheFilePath(function () {}, ['arg', 'arg'], {cacheId: 'foobar'})
-// -> '/foobar/06f254...'
+var memoizer = require('memoize-fs')({ cachePath: './' })
+memoizer.getCacheFilePath(function () {}, ['arg', 'arg'], { cacheId: 'foobar' })
+// -> './foobar/06f254...'
 ```
 
 Since memoize-fs is using JSON for serialization, __you should know__ how it works around some of its "limitations":
@@ -222,11 +329,13 @@ Issues and Pull-requests are absolutely welcome. If you want to submit a patch, 
 many people contributed. — [idiomatic.js](https://github.com/rwldrn/idiomatic.js/)
 
 Lint with:
+
 ```shell
-npm run jshint
+npm run lint
 ```
 
 Test with:
+
 ```shell
 npm run mocha
 ```
@@ -234,7 +343,7 @@ npm run mocha
 Check code coverage with:
 
 ```shell
-npm run istanbul
+npm run coverage
 ```
 
-Then please commit with a __detailed__ commit message.
+Then please commit with a **detailed** commit message.
