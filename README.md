@@ -149,6 +149,7 @@ export interface Options {
   serialize?: (val?: any) => string;
   deserialize?: (val?: string) => any;
 }
+
 export type MemoizeOptions = Options & { cachePath: string }
 
 export type FunctionToMemoize = (...args: any[]) => any;
