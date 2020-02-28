@@ -187,7 +187,7 @@ The `cacheId` option which you can specify during memoization of a function reso
 Cached function calls will be cached inside that folder:
 
 ```js
-memoizer.fn(fun, { cacheId: 'foobar' })
+memoizer.fn(fnToMemoize, { cacheId: 'foobar' })
 ```
 
 ### salt
@@ -198,7 +198,7 @@ In order to avoid the same cache being used for two different functions you can 
 which mutates the hash key created for the memoized function which in turn defines the name of the cache file:
 
 ```js
-memoizer.fn(fun, { salt: 'foobar' })
+memoizer.fn(fnToMemoize, { salt: 'foobar' })
 ```
 
 ### maxAge
@@ -206,7 +206,7 @@ memoizer.fn(fun, { salt: 'foobar' })
 With `maxAge` option you can ensure that cache for given call is cleared after a predefined period of time (in milliseconds).
 
 ```js
-memoizer.fn(fun, { maxAge: 10000 })
+memoizer.fn(fnToMemoize, { maxAge: 10000 })
 ```
 
 ### force
@@ -214,7 +214,7 @@ memoizer.fn(fun, { maxAge: 10000 })
 The `force` option forces the re-execution of an already memoized function and the re-caching of its outcome:
 
 ```js
-memoizer.fn(fun, { force: true })
+memoizer.fn(fnToMemoize, { force: true })
 ```
 
 ### astBody
@@ -222,7 +222,7 @@ memoizer.fn(fun, { force: true })
 If you want to use the function AST instead the function body when generating the hash ([see serialization](#serialization)), set the option `astBody` to `true`. This allows the function source code to be reformatted without busting the cache. See https://github.com/borisdiakur/memoize-fs/issues/6 for details.
 
 ```js
-memoizer.fn(fun, { astBody: true })
+memoizer.fn(fnToMemoize, { astBody: true })
 ```
 
 ### noBody
@@ -230,7 +230,7 @@ memoizer.fn(fun, { astBody: true })
 If for some reason you want to omit the function body when generating the hash ([see serialization](#serialization)), set the option `noBody` to `true`.
 
 ```js
-memoizer.fn(fun, { noBody: true })
+memoizer.fn(fnToMemoize, { noBody: true })
 ```
 
 ### serialize and deserialize
@@ -268,13 +268,13 @@ memoizer.fn(someFn)
 You can delete the root cache (all cache files inside the folder specified by the cachePath option):
 
 ```js
-memoize.invalidate().then(() => { console.log('cache cleared') })
+memoizer.invalidate().then(() => { console.log('cache cleared') })
 ```
 
 You can also pass the cacheId argument to the invalidate method. This way you only delete the cache inside the subfolder with given id.
 
 ```js
-memoize.invalidate('foobar').then(() => { console.log('cache for "foobar" cleared') })
+memoizer.invalidate('foobar').then(() => { console.log('cache for "foobar" cleared') })
 ```
 
 ## Serialization
