@@ -150,9 +150,8 @@ export interface Options {
   deserialize?: (val?: string) => any;
 }
 
-export type MemoizeOptions = Options & { cachePath: string }
-
-export type FunctionToMemoize = (...args: any[]) => any;
+export type MemoizeOptions = Options & { cachePath: string };
+export type FnToMemoize = (...args: any[]) => any;
 
 export interface Memoizer {
   fn: (fnToMemoize: FunctionToMemoize, options?: Options) => Promise<FunctionToMemoize>;
@@ -160,7 +159,9 @@ export interface Memoizer {
   getCacheFilePath: (fnToMemoize: FunctionToMemoize, options: Options) => string;
 }
 
-export default function memoizeFs(options: MemoizeOptions): Memoizer;
+declare function memoizeFs(options: MemoizeOptions): Memoizer;
+
+export = memoizeFs;
 ```
 
 ## Options
