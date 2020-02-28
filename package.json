@@ -8,7 +8,7 @@
     "pretest": "npm run lint",
     "test": "nyc mocha",
     "mocha": "mocha -R nyan",
-    "coverage": "nyc report | coveralls",
+    "coverage": "nyc report --reporter text-lcov | coveralls",
     "cov": "open-cli coverage/lcov-report/index.html"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
