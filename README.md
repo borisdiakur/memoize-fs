@@ -343,7 +343,7 @@ npm run mocha
 Check code coverage with:
 
 ```shell
-npm run coverage
+npm run cov
 ```
 
 Then please commit with a **detailed** commit message.
