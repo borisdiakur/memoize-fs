@@ -1,3 +1,6 @@
+### 2.1.0 (2020-02-28)
+* feat: support custom serialize & deserialize through options
+
 ### 2.0.0 (2020-02-03)
 
 * __BREAKING CHANGE__: drop support for node < 10
