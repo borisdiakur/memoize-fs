@@ -28,7 +28,9 @@ function serialize (val) {
       circRefColl.push(value)
     }
     return value
-  })
+  },
+  4 // spece indent for prettify cached data in file
+  )
 }
 
 function deserialize (str) {
@@ -140,7 +142,7 @@ function buildMemoizer (options) {
                   resultObj = { data: r }
                   resultString = optExt.serialize(resultObj)
                 } else {
-                  resultString = '{"data":' + r + '}'
+                  resultString = '{\n   "data":' + r + '\n}'
                 }
                 if (optExt.maxAge) {
                   setTimeout(function () {
