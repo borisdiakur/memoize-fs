@@ -5,6 +5,7 @@ export interface Options {
   force?: boolean
   astBody?: boolean
   noBody?: boolean
+  retryOnInvalidCache?: boolean
   serialize?: (val?: any) => string
   deserialize?: (val?: string) => any
 }
