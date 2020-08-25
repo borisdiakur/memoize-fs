@@ -82,6 +82,9 @@ function buildMemoizer (options) {
     if (opts.deserialize && typeof opts.deserialize !== 'function') {
       throw new TypeError('deserialize option of type function expected')
     }
+    if (opts.retryOnInvalidCache && typeof opts.deserialize !== 'boolean') {
+      throw new TypeError('retryOnInvalidCache option of type boolean expected')
+    }
   }
 
   // check for existing cache folder, if not found, create folder, then resolve
@@ -222,13 +225,18 @@ function buildMemoizer (options) {
                 }
               }
 
+              const parsedData = parseResult(data)
+              if (optExt.retryOnInvalidCache && parsedData === undefined) {
+                return cacheAndReturn()
+              }
+
               function retrieveAndReturn () {
                 function processFnAsync () {
-                  resolve(fnaCb.apply(null, parseResult(data)))
+                  resolve(fnaCb.apply(null, parsedData))
                 }
 
                 function processFn () {
-                  resolve(parseResult(data))
+                  resolve(parsedData)
                 }
 
                 if (optExt.async) {
