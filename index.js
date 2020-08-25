@@ -82,7 +82,7 @@ function buildMemoizer (options) {
     if (opts.deserialize && typeof opts.deserialize !== 'function') {
       throw new TypeError('deserialize option of type function expected')
     }
-    if (opts.retryOnInvalidCache && typeof opts.deserialize !== 'boolean') {
+    if (opts.retryOnInvalidCache && typeof opts.retryOnInvalidCache !== 'boolean') {
       throw new TypeError('retryOnInvalidCache option of type boolean expected')
     }
   }
