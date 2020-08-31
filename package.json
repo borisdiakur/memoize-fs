@@ -38,7 +38,7 @@
     "mocha": "^7.1.0",
     "nyc": "^15.0.0",
     "open-cli": "^5.0.0",
-    "serialize-javascript": "^3.0.0"
+    "serialize-javascript": "^4.0.0"
   },
   "private": false,
   "main": "index.js",

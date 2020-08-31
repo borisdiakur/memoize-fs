@@ -1,3 +1,6 @@
+### 2.2.0 (2020-08-31)
+* feat: add retryOnInvalidCache option (#27)
+
 ### 2.1.0 (2020-02-28)
 * feat: support custom serialize & deserialize through options
 
