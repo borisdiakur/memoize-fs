@@ -62,6 +62,13 @@ describe('memoize-fs', function () {
       done()
     })
 
+    it('should throw an error when option param retryOnInvalidCache is not of type boolean', function (done) {
+      assert.throws(function () {
+        memoizeFs({retryOnInvalidCache: 'true'})
+      }, Error, 'expected to throw an error when option param retryOnInvalidCache is not of type boolean')
+      done()
+    })
+
     it('should throw an error when option value is not of type object', function (done) {
       assert.throws(function () {
         memoizeFs('foobar')
@@ -1221,6 +1228,39 @@ describe('memoize-fs', function () {
           }
         })
       }).catch(done)
+    })
+  })
+
+  describe('retryOnInvalidCache', function () {
+    it('should retry when the cache file is invalid', function (done) {
+      const cachePath = FIXTURE_CACHE
+      const memoize = memoizeFs({ cachePath: cachePath })
+
+      let timesCalled = 0
+      const fnToMemo = function (a, b) { timesCalled++; return a + b }
+
+      const args = [1, 2]
+      const options = { cacheId: 'foobar', retryOnInvalidCache: true }
+      memoize
+        .fn(fnToMemo, options)
+        .then(function (memFn) {
+          return memFn(...args)
+        })
+        .then(function () {
+          const cacheFilePath = memoize.getCacheFilePath(fnToMemo, args, options)
+          return fs.writeFile(cacheFilePath, '}{') // write some invalid JSON
+        })
+        .then(function () {
+          return memoize.fn(fnToMemo, options)
+        })
+        .then(function (memFn) {
+          return memFn(...args)
+        })
+        .then(function () {
+          assert.equal(timesCalled, 2)
+          done()
+        })
+        .catch(done)
     })
   })
 
