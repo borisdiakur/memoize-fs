@@ -233,6 +233,14 @@ If for some reason you want to omit the function body when generating the hash (
 memoizer.fn(fnToMemoize, { noBody: true })
 ```
 
+### retryOnInvalidCache
+
+By default, `undefined` is returned when trying to read an invalid cache file. For example, when trying to parse an empty file with `JSON.parse`. By enabling `retryOnInvalidCache`, the memoized function will be called again, and a new cache file will be written.
+
+```js
+memoizer.fn(fnToMemoize, { retryOnInvalidCache: true })
+```
+
 ### serialize and deserialize
 
 These two options allows you to control how the serialization and deserialization process works.
