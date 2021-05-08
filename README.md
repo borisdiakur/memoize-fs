@@ -287,7 +287,7 @@ memoizer.invalidate('foobar').then(() => { console.log('cache for "foobar" clear
 
 ## Serialization
 
-See also the [`options.seriliaze` and `options.deserialize`](#serialize-and-deserialize).
+See also the [`options.serialize` and `options.deserialize`](#serialize-and-deserialize).
 
 memoize-fs uses JSON to serialize the results of a memoized function.
 It also uses JSON, when it tries to serialize the arguments of the memoized function in order to create a hash
