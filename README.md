@@ -253,7 +253,11 @@ to be able to cache properly the return result of memoized function containing a
 const memoizeFs = require('memoize-fs')
 const serialize = require('serialize-javascript')
 
-const deserialize = (serializedJsString) => eval(`(${serializedJsString})`)
+// if your result is an object or a string, your deserializer must expand `.data` to handle the implicit object wrapping: 
+// See: https://github.com/borisdiakur/memoize-fs/blob/34fb162c838d65e4d090730d96e1e717441b7bd6/index.js#L142-L146
+// const deserialize = (serializedJsString) => eval(`(${serializedJsString})`).data;
+
+const deserialize = (serializedJsString) => eval(`(${serializedJsString})`);
 
 const memoizer = memoizeFs({ cachePath: './cache', serialize, deserialize })
 
