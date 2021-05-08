@@ -253,7 +253,9 @@ to be able to cache properly the return result of memoized function containing a
 const memoizeFs = require('memoize-fs')
 const serialize = require('serialize-javascript')
 
-const deserialize = (serializedJsString) => eval(`(${serializedJsString})`)
+// Note: For the sake of the example we use eval in the next line of code. eval is dangegrous
+// in most cases. Don't do this at home, or anywhere else, unless you know what you are doing.
+const deserialize = (serializedJsString) => eval(`(() => (${serializedJavascript}))()`).data
 
 const memoizer = memoizeFs({ cachePath: './cache', serialize, deserialize })
 

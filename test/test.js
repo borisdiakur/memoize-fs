@@ -64,7 +64,7 @@ describe('memoize-fs', function () {
 
     it('should throw an error when option param retryOnInvalidCache is not of type boolean', function (done) {
       assert.throws(function () {
-        memoizeFs({retryOnInvalidCache: 'true'})
+        memoizeFs({cachePath: 'yolo', retryOnInvalidCache: 'yes'})
       }, Error, 'expected to throw an error when option param retryOnInvalidCache is not of type boolean')
       done()
     })
@@ -112,7 +112,7 @@ describe('memoize-fs', function () {
 
       function deserialize (serializedJavascript) {
         // eslint-disable-next-line no-eval
-        return eval('(' + serializedJavascript + ')')
+        return eval(`(() => (${serializedJavascript}))()`).data
       }
 
       const options = {cachePath, cacheId: 'tmp', serialize, deserialize}
@@ -129,7 +129,11 @@ describe('memoize-fs', function () {
             .then((res) => {
               assert.strictEqual(res.abc, 200)
               assert.strictEqual(typeof res.foo, 'function')
-
+              return memFn(200)
+            })
+            .then((res) => {
+              assert.strictEqual(res.abc, 200)
+              assert.strictEqual(typeof res.foo, 'function')
               return memFn(400)
             })
             .then((res) => {
