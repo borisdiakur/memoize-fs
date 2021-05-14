@@ -217,6 +217,10 @@ The `force` option forces the re-execution of an already memoized function and t
 memoizer.fn(fnToMemoize, { force: true })
 ```
 
+**NOTE** that using the force option you are invalidating one single function outcome with specific arguments passed to that function
+(the first after memoization). All other previously cached results for that function are kept in the cache. If you need to invalidate
+all cache for a function, you can use [cache invalidation](#manual-cache-invalidation).
+
 ### astBody
 
 If you want to use the function AST instead the function body when generating the hash ([see serialization](#serialization)), set the option `astBody` to `true`. This allows the function source code to be reformatted without busting the cache. See https://github.com/borisdiakur/memoize-fs/issues/6 for details.
