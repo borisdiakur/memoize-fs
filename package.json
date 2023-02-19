@@ -1,15 +1,36 @@
 {
   "name": "memoize-fs",
   "version": "2.2.0",
-  "description": "Node.js solution for memoizing/caching a function and its return state into the file system",
-  "author": "Boris Diakur <contact@borisdiakur.com> (https://github.com/borisdiakur)",
+  "private": false,
+  "type": "module",
+  "author": "Boris Diakur (https://borisdiakur.de)",
+  "description": "Node.js solution for memoizing/caching function results on the file system",
+  "keywords": [
+    "memoize",
+    "memoizer",
+    "cache",
+    "caching",
+    "memoization",
+    "file system",
+    "fs"
+  ],
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rollup --config rollup.config.ts --configPlugin typescript",
     "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "nyc mocha",
-    "mocha": "mocha -R nyan",
-    "coverage": "nyc report --reporter text-lcov | coveralls",
-    "cov": "open-cli coverage/lcov-report/index.html"
+    "test": "npm run lint && npm run coverage",
+    "open-coverage": "open coverage/lcov-report/index.ts.html",
+    "publish-coverage": "npm run coverage && coveralls < coverage/lcov.info",
+    "coverage": "vitest run --coverage"
   },
   "homepage": "https://github.com/borisdiakur/memoize-fs",
   "bugs": {
@@ -24,57 +45,33 @@
     "npm": ">= 6.0.0"
   },
   "dependencies": {
-    "fs-extra": "^8.1.0",
-    "meriyah": "^1.9.7"
+    "meriyah": "^4.3.4"
   },
   "devDependencies": {
-    "coveralls": "^3.0.9",
-    "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^8.4.0",
-    "nyc": "^15.0.0",
-    "open-cli": "^6.0.1",
-    "serialize-javascript": "^4.0.0"
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@rollup/plugin-typescript": "^10.0.1",
+    "@types/node": "^18.11.11",
+    "@types/serialize-javascript": "^5.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.45.1",
+    "@typescript-eslint/parser": "^5.45.1",
+    "@vitest/coverage-c8": "^0.28.4",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "open-cli": "^7.1.0",
+    "prettier": "^2.8.1",
+    "rollup": "^3.17.1",
+    "serialize-javascript": "^6.0.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
+    "vitest": "^0.28.4"
   },
-  "private": false,
-  "main": "index.js",
-  "typings": "index.d.ts",
-  "files": [
-    "index.js",
-    "index.d.ts"
-  ],
-  "keywords": [
-    "memoize",
-    "memoizer",
-    "cache",
-    "memoization",
-    "memo",
-    "memcached",
-    "hashing",
-    "storage",
-    "persistence",
-    "caching",
-    "memory",
-    "file system",
-    "fs"
-  ],
   "license": "MIT",
-  "nyc": {
-    "exclude": [
-      "test"
-    ],
-    "reporter": [
-      "text",
-      "lcov"
-    ],
-    "check-coverage": true,
-    "branches": 80,
-    "lines": 80,
-    "functions": 80,
-    "statements": 80
+  "prettier": {
+    "singleQuote": true,
+    "semi": false
   }
 }

@@ -1,18 +1,15 @@
 # memoize-fs
 
-Node.js solution for memoizing/caching a function and its return state into the file system
+Node.js solution for memoizing/caching function results on the file system
 
-[![Build Status](https://travis-ci.org/borisdiakur/memoize-fs.svg?branch=master)](https://travis-ci.org/borisdiakur/memoize-fs)
-[![Coverage Status](https://coveralls.io/repos/borisdiakur/memoize-fs/badge.svg?branch=master)](https://coveralls.io/r/borisdiakur/memoize-fs?branch=master)
+[![Coverage Status](https://coveralls.io/repos/borisdiakur/memoize-fs/badge.svg?branch=main)](https://coveralls.io/r/borisdiakur/memoize-fs?branch=main)
 [![npm version](https://badge.fury.io/js/memoize-fs.svg)](http://badge.fury.io/js/memoize-fs)
 [![Standard - JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
 ## Motivation
-This project is inspired by the [memoize project](https://github.com/medikoo/memoize) by [Mariusz Nowak aka medikoo](https://github.com/medikoo).
-The motivation behind this module is that sometimes you have to persist cached function calls but you do not want to deal with an extra process
-(ie. managing a Redis store).
+Sometimes you have to persist cached function calls, but you do not want to deal with an extra process (i.e. managing a Redis store).
 
-Memoization is best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see:
+Memoization is the best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see:
 http://en.wikipedia.org/wiki/Memoization
 
 ## Features
@@ -40,9 +37,9 @@ const memoizer = memoizeFs({ cachePath: './some-cache' })
 
 console.log(memoizer)
 // => {
-//   fn: [Function: fn],
-//   getCacheFilePath: [Function: getCacheFilePathBound],
-//   invalidate: [Function: invalidateCache]
+//  fn: [AsyncFunction: fn],
+//  getCacheFilePath: [Function: t],
+//  invalidate: [AsyncFunction: e]
 // }
 
 async function main () {
@@ -69,24 +66,24 @@ main().catch(console.error)
 _**NOTE:** that memoized function is always an async function and
 the result of it is a Promise (if not `await`-ed as seen in above example)!_
 
-- [Learn more about Promises](https://javascript.info/promise-basics)
-- [Learn more about async/await](https://javascript.info/async-await)
+- [Learn more about Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+- [Learn more about async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)
 
 ### Signature
 
 See [Types](#types) and [Options](#options) sections for more info.
 
-```js
-const memoizer = memoizeFs(MemoizeOptions)
+```ts
+const memoizer = memoizeFs(options)
 
 console.log(memoizer)
 // => {
-//   fn: [Function: fn],
-//   getCacheFilePath: [Function: getCacheFilePathBound],
-//   invalidate: [Function: invalidateCache]
+//  fn: [AsyncFunction: fn],
+//  getCacheFilePath: [Function: t],
+//  invalidate: [AsyncFunction: e]
 // }
 
-const memoizedFn = memoizer.fn(FunctionToMemoize, Options?)
+const memoizedFn = memoizer.fn(functionToMemoize, options)
 ```
 
 ## Memoizing asynchronous functions
@@ -96,19 +93,16 @@ So basically you don't have to do anything differently than when memoizing synch
 Here is an example of memoizing a function with a callback:
 
 ```js
-var funAsync = function (a, b, cb) {
-    setTimeout(function () {
-        cb(null, a + b);
-    }, 100);
+const funAsync = function (a, b, cb) {
+  setTimeout(function () {
+    cb(null, a + b);
+  }, 100);
 };
 
-memoize.fn(funAsync).then(function (memFn) {
-    memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }).then(function () {
-        return memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }); // cache hit
-    }).then(function () {
-        // callback is called with previously cached arguments
-    }).catch( /* handle error */ );
-}).catch( /* handle error */ );
+const memFn = await memoize.fn(funAsync)
+
+await memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); })
+await memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }) // cache hit
 ```
 
 ## Memoizing promisified functions
@@ -120,55 +114,71 @@ So again it's the same as with memoizing synchronous functions.
 Here is an example of memoizing a promisified function:
 
 ```js
-var funPromisified = function (a, b) {
-    return new Promise(function (resolve, reject) {
-        setTimeout(function () { resolve(a + b); }, 100);
-    });
-};
+const memoizer = memoizeFs({ cachePath: './some-cache' })
 
-memoize.fn(funPromisified).then(function (memFn) {
-    memFn(1, 2).then(function (result) {
-        assert.strictEqual(result, 3);
-        return memFn(1, 2); // cache hit
-    }).then(function (result) {
-        assert.strictEqual(result, 3);
-    }).catch( /* handle error */ );
-}).catch( /* handle error */ );
+const funAsync = function (a, b, cb) {
+  setTimeout(function () {
+    cb(null, a + b)
+  }, 100)
+}
+
+;(async () => {
+  const memFn = await memoizer.fn(funAsync)
+
+  await memFn(1, 2, function (err, sum) {
+    if (err) throw err
+    console.log(sum)
+  })
+  await memFn(1, 2, function (err, sum) {
+    if (err) throw err
+    console.log(sum)
+  }) // cache hit
+})()
 ```
 
 ## Types
 
 ```ts
-export interface Options {
-  cacheId?: string;
-  salt?: string;
-  maxAge?: number;
-  force?: boolean;
-  astBody?: boolean;
-  noBody?: boolean;
-  serialize?: (val?: any) => string;
-  deserialize?: (val?: string) => any;
+export interface MemoizerOptions {
+  cacheId: string
+  cachePath: string
+  salt: string
+  maxAge: number
+  force: boolean
+  astBody: boolean
+  noBody: boolean
+  throwError: boolean
+  retryOnInvalidCache: boolean
+  serialize: (val: unknown) => string
+  deserialize: (val: string) => unknown
 }
 
-export type MemoizeOptions = Options & { cachePath: string };
-export type FnToMemoize = (...args: any[]) => any;
+export declare function getCacheFilePath(
+  fn: unknown,
+  args: unknown[],
+  opt: Partial<MemoizerOptions>
+): string
 
-export interface Memoizer {
-  fn: (fnToMemoize: FunctionToMemoize, options?: Options) => Promise<FunctionToMemoize>;
-  invalidate: (id?: string) => Promise<any>;
-  getCacheFilePath: (fnToMemoize: FunctionToMemoize, options: Options) => string;
+export default function buildMemoizer(
+  memoizerOptions: Partial<MemoizerOptions>
+): {
+  fn: <FN extends (...args: never) => unknown>(
+    fn: FN,
+    opt?: Partial<MemoizerOptions>
+  ) => Promise<(...args: Parameters<FN>) => Promise<ReturnType<FN>>>
+  getCacheFilePath: (
+    fn: (...args: never) => unknown,
+    args: unknown[],
+    opt: Partial<MemoizerOptions>
+  ) => string
+  invalidate: (cacheId?: string) => Promise<void>
 }
-
-declare function memoizeFs(options: MemoizeOptions): Memoizer;
-
-export = memoizeFs;
 ```
 
 ## Options
 
 When memoizing a function all below options can be applied in any combination.
 The only required option is `cachePath`.
-
 
 ### cachePath
 
@@ -179,8 +189,8 @@ Path to the location of the cache on the disk. This option is always **required*
 By default all cache files are saved into the __root cache__ which is the folder specified by the cachePath option:
 
 ```js
-var path = require('path')
-var memoizer = require('memoize-fs')({ cachePath: path.join(__dirname, '../../cache') })
+const path = require('path')
+const memoizer = require('memoize-fs')({ cachePath: path.join(__dirname, '../../cache') })
 ```
 
 The `cacheId` option which you can specify during memoization of a function resolves to the name of a subfolder created inside the root cache folder.
@@ -254,8 +264,8 @@ In the following example we are using [Yahoo's `serialize-javascript`](https://g
 to be able to cache properly the return result of memoized function containing a `function`.
 
 ```js
-const memoizeFs = require('memoize-fs')
-const serialize = require('serialize-javascript')
+import memoizeFs from 'memoize-fs'
+import serialize from 'serialize-javascript'
 
 // Note: For the sake of the example we use eval in the next line of code. eval is dangegrous
 // in most cases. Don't do this at home, or anywhere else, unless you know what you are doing.
@@ -303,7 +313,7 @@ The hash is created from the serialized arguments, the function body and the [sa
 You can generate this hash using `memoize.getCacheFilePath`:
 
 ```js
-var memoizer = require('memoize-fs')({ cachePath: './' })
+const memoizer = require('memoize-fs')({ cachePath: './' })
 memoizer.getCacheFilePath(function () {}, ['arg', 'arg'], { cacheId: 'foobar' })
 // -> './foobar/06f254...'
 ```
@@ -341,23 +351,5 @@ Issues and Pull-requests are absolutely welcome. If you want to submit a patch, 
 
 > All code in any code-base should look like a single person typed it, no matter how
 many people contributed. — [idiomatic.js](https://github.com/rwldrn/idiomatic.js/)
-
-Lint with:
-
-```shell
-npm run lint
-```
-
-Test with:
-
-```shell
-npm run mocha
-```
-
-Check code coverage with:
-
-```shell
-npm run cov
-```
 
 Then please commit with a **detailed** commit message.
