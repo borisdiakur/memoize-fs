@@ -1,13 +1,30 @@
 name: CI/CD
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - rc
+  pull_request:
 
 jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
+        with:
+          merge-method: 'rebase'
+          target: 'minor'
+          github-token: ${{ github.token }}
+
   test:
     name: Test with Node v${{ matrix.node }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [ 15, 18 ]
+        node: [ 18 ]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -15,3 +32,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm test
+      - name: Publish coverage report
+        if: github.ref == 'refs/heads/main'
+        run: npm run publish-coverage
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

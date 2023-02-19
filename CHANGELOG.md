@@ -1,3 +1,8 @@
+### 3.0.0 (2023-02-20)
+* __BREAKING CHANGE__: drop support for node < 18
+* __BREAKING CHANGE__: memoize-fs is now an esm module
+* __BREAKING CHANGE__: stricter types (see dist/index.d.ts)
+
 ### 2.2.0 (2020-08-31)
 * feat: add retryOnInvalidCache option (#27)
 
