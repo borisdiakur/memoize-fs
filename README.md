@@ -251,7 +251,7 @@ memoizer.fn(fnToMemoize, { retryOnInvalidCache: true })
 These two options allows you to control how the serialization and deserialization process works.
 By default we use basic `JSON.stringify` and `JSON.parse`, but you may need more advanced stuff.
 
-In the following example we are using [Yahoo's `serialize-javascript`](https://ghub.now.sh/serialize-javascript)
+In the following example we are using [Yahoo's `serialize-javascript`](https://github.com/yahoo/serialize-javascript)
 to be able to cache properly the return result of memoized function containing a `function`.
 
 ```js
