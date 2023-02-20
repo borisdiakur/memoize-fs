@@ -1,6 +1,6 @@
 {
   "name": "memoize-fs",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Node.js solution for memoizing/caching a function and its return state into the file system",
   "author": "Boris Diakur <contact@borisdiakur.com> (https://github.com/borisdiakur)",
   "scripts": {
