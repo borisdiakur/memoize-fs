@@ -29,7 +29,7 @@ npm install memoize-fs --save
 ## Usage
 
 ```js
-import memoizeFs from './dist/index.mjs'
+import memoizeFs from 'memoize-fs'
 import assert from 'node:assert'
 
 const memoizer = memoizeFs({ cachePath: './some-cache' })
