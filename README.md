@@ -56,6 +56,10 @@ const memoizer = memoizeFs({ cachePath: './some-cache' })
 _**NOTE:** that memoized function is always an async function and
 the result of it is a Promise (if not `await`-ed as seen in above example)!_
 
+> **Note**
+> A memoized function is always an async function and
+the result of it is a Promise (which you can `await`, as seen in the example above)!
+
 - [Learn more about Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 - [Learn more about async/await](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)
 
