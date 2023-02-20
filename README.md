@@ -8,7 +8,7 @@ Node.js solution for memoizing/caching function results on the file system
 ## Motivation
 Sometimes you have to persist cached function calls, but you do not want to deal with an extra process (i.e. managing a Redis store).
 
-Memoization is the best technique to save on memory or CPU cycles when we deal with repeated operations. For detailed insight see:
+Memoization is a technique which can help save on memory or CPU cycles when dealing with repeated operations. For detailed insight see:
 http://en.wikipedia.org/wiki/Memoization
 
 ## Features
