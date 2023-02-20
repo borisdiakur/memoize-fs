@@ -29,21 +29,14 @@ npm install memoize-fs --save
 ## Usage
 
 ```js
-const assert = require('assert')
-const memoizeFs = require('memoize-fs')
+import memoizeFs from './dist/index.mjs'
+import assert from 'node:assert'
 
 const memoizer = memoizeFs({ cachePath: './some-cache' })
 
-console.log(memoizer)
-// => {
-//  fn: [AsyncFunction: fn],
-//  getCacheFilePath: [Function: t],
-//  invalidate: [AsyncFunction: e]
-// }
-
-async function main () {
+;(async () => {
   let idx = 0
-  const func = function foo (a, b) {
+  const func = function foo(a, b) {
     idx += a + b
     return idx
   }
@@ -57,9 +50,7 @@ async function main () {
   const resultTwo = await memoizedFn(1, 2) // cache hit
   assert.strictEqual(resultTwo, 3)
   assert.strictEqual(idx, 3)
-}
-
-main().catch(console.error)
+})()
 ```
 
 _**NOTE:** that memoized function is always an async function and
