@@ -6,3 +6,8 @@ updates:
       interval: 'weekly'
     ignore:
       - dependency-name: "jest-cli"
+    groups:
+      production-dependencies:
+        dependency-type: 'production'
+      development-dependencies:
+        dependency-type: 'development'
