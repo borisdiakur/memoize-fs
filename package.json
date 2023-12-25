@@ -60,7 +60,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-promise": "^6.1.1",
-    "open-cli": "^7.1.0",
+    "open-cli": "^8.0.0",
     "prettier": "^3.0.0",
     "rollup": "^4.0.2",
     "serialize-javascript": "^6.0.0",
