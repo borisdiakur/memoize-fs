@@ -6,7 +6,8 @@
     "strict": true,
     "moduleResolution": "node",
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true
   },
-  "include": ["src/index.ts"]
+  "include": ["src"]
 }
