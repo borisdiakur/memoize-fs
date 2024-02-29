@@ -1430,4 +1430,19 @@ describe('memoize-fs', () => {
       assert.ok(throws)
     })
   })
+
+  describe('typing', () => {
+    it('should not double-wrap Promise<Promise<T>>', async () => {
+      const cachePath = FIXTURE_CACHE
+      const memoize = memoizeFs({ cachePath })
+
+      const syncFunction: () => number= () => 1;
+      const asyncFunction: () => Promise<number> = async () => 1;
+
+      let memFn: () => Promise<number>;
+      memFn = await memoize.fn(syncFunction);
+      memFn = await memoize.fn(asyncFunction);
+      memFn;
+    })
+  })
 })

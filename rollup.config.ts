@@ -5,5 +5,5 @@ export default {
   output: {
     file: 'dist/index.mjs',
   },
-  plugins: [typescript()],
+  plugins: [typescript({ include: ['src/index.ts'] })],
 }

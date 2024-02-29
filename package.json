@@ -27,7 +27,7 @@
   "scripts": {
     "build": "rollup --config rollup.config.ts --configPlugin typescript",
     "lint": "eslint .",
-    "test": "npm run lint && npm run coverage",
+    "test": "npm run lint && tsc --noEmit && npm run coverage",
     "open-coverage": "open coverage/lcov-report/index.ts.html",
     "publish-coverage": "npm run coverage && coveralls < coverage/lcov.info",
     "coverage": "vitest run --coverage"
