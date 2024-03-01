@@ -1,3 +1,6 @@
+### 3.0.1 (2024-03-01)
+* fix: instead of `Promise<Promise<T>>`, return `Promise<T>`
+
 ### 3.0.0 (2023-02-20)
 * __BREAKING CHANGE__: drop support for node < 18
 * __BREAKING CHANGE__: memoize-fs is now an esm module
