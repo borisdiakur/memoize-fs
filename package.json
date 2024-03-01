@@ -14,18 +14,16 @@
     "file system",
     "fs"
   ],
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rollup --config rollup.config.ts --configPlugin typescript",
+    "build": "tsc && vite build",
     "lint": "eslint .",
     "test": "npm run lint && tsc --noEmit && npm run coverage",
     "open-coverage": "open coverage/lcov-report/index.ts.html",
@@ -41,7 +39,7 @@
     "url": "https://github.com/borisdiakur/memoize-fs"
   },
   "engines": {
-    "node": ">= 10.13.0",
+    "node": ">= 18.0.0",
     "npm": ">= 6.0.0"
   },
   "dependencies": {
@@ -49,8 +47,8 @@
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@types/node": "^20.1.0",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.11.24",
     "@types/serialize-javascript": "^5.0.2",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
     "@typescript-eslint/parser": "^7.0.1",
@@ -62,11 +60,9 @@
     "eslint-plugin-promise": "^6.1.1",
     "open-cli": "^8.0.0",
     "prettier": "^3.0.0",
-    "rollup": "^4.0.2",
     "serialize-javascript": "^6.0.0",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.5.0",
-    "typescript": "^5.0.4",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
     "vitest": "^1.0.4"
   },
   "license": "MIT",

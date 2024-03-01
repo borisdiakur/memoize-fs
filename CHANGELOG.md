@@ -1,3 +1,6 @@
+### 3.0.2 (2024-03-01)
+* fix: importing fails with moduleResolution set to node16
+
 ### 3.0.1 (2024-03-01)
 * fix: instead of `Promise<Promise<T>>`, return `Promise<T>`
 
