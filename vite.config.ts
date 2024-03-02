@@ -21,4 +21,7 @@ export default defineConfig({
       ],
     },
   },
+  esbuild: {
+    minifyIdentifiers: false,
+  }
 });
