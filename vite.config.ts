@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 
 import typescript from "@rollup/plugin-typescript";
 import path from "path";
+import { readdirSync } from "fs";
+
+const nodeModules = readdirSync(path.resolve(__dirname, 'node_modules'));
 
 export default defineConfig({
   build: {
@@ -19,6 +22,8 @@ export default defineConfig({
           exclude: ["src/index.test.ts"]
         }),
       ],
+      // do not bundle Node dependencies
+      external: nodeModules,
     },
   },
   esbuild: {
