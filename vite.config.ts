@@ -25,6 +25,7 @@ export default defineConfig({
       // do not bundle Node dependencies
       external: nodeModules,
     },
+    ssr: true
   },
   esbuild: {
     minifyIdentifiers: false,
