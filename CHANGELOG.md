@@ -1,3 +1,8 @@
+### 3.0.3 (2024-03-03)
+* fix: void 0 build issue
+* fix: do not minify (mangle) identifiers in bundle
+* fix: do not bundle meriyah dependency
+
 ### 3.0.2 (2024-03-01)
 * fix: importing fails with moduleResolution set to node16
 
