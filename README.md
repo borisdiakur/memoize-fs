@@ -156,7 +156,7 @@ export default function buildMemoizer(
   fn: <FN extends (...args: never) => unknown>(
     fn: FN,
     opt?: Partial<MemoizerOptions>
-  ) => Promise<(...args: Parameters<FN>) => EnsurePromise<ReturnType<FN>>>
+  ) => Promise<(...args: Parameters<FN>) => Promise<Awaited<ReturnType<FN>>>>
   getCacheFilePath: (
     fn: (...args: never) => unknown,
     args: unknown[],
@@ -164,8 +164,6 @@ export default function buildMemoizer(
   ) => string
   invalidate: (cacheId?: string) => Promise<void>
 }
-
-type EnsurePromise<T> = T extends PromiseLike<unknown> ? T : Promise<T>;
 ```
 
 ## Options
