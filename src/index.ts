@@ -405,11 +405,9 @@ export default function buildMemoizer(
       await initCache(memoizerOptions.cachePath || '')
       return memoizeFn(fn as never, opt) as unknown as (
         ...args: Parameters<FN>
-      ) => EnsurePromise<ReturnType<FN>>
+      ) => Promise<Awaited<ReturnType<FN>>>
     },
     getCacheFilePath: getCacheFilePathBound,
     invalidate: invalidateCache,
   }
 }
-
-type EnsurePromise<T> = T extends PromiseLike<unknown> ? T : Promise<T>;
