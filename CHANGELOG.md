@@ -1,3 +1,6 @@
+### 3.0.4 (2024-03-06)
+* style: improve typing by using Awaited instead of our custom EnsurePromise type
+
 ### 3.0.3 (2024-03-03)
 * fix: void 0 build issue
 * fix: do not minify (mangle) identifiers in bundle
