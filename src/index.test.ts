@@ -9,7 +9,7 @@ import {
   access,
   constants,
 } from 'fs/promises'
-import memoizeFs, { getCacheFilePath, type MemoizerOptions } from './index'
+import memoizeFs, { getCacheFilePath, type MemoizerOptions } from './index.js'
 import * as path from 'path'
 import serialize from 'serialize-javascript'
 
@@ -295,7 +295,7 @@ describe('memoize-fs', () => {
 
       const memFn = await memoize.fn(
         () =>
-          new Promise(function (resolve, reject) {
+          new Promise(function (_, reject) {
             setTimeout(function () {
               reject(Error('qux'))
             }, 10)
@@ -631,7 +631,7 @@ describe('memoize-fs', () => {
     }
     const memFn = await memoize.fn(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      function (a: unknown, b: unknown, circ: Circ) {
+      function (a: unknown, b: unknown) {
         return {
           a: a,
           b: b,
@@ -646,7 +646,7 @@ describe('memoize-fs', () => {
       },
       { cacheId: 'foobar' }
     )
-    let result = await memFn(1, 2, new Circ())
+    let result = await memFn(1, 2)
 
     assert.ok(Circ.prototype.isPrototypeOf(result.circ)) // eslint-disable-line no-prototype-builtins
     assert.strictEqual(result.circ.abc, 'Hello')
@@ -666,7 +666,7 @@ describe('memoize-fs', () => {
       },
     } as never)
     c = 999
-    result = await memFn(1, 2, new Circ())
+    result = await memFn(1, 2)
 
     assert.deepStrictEqual(result, {
       a: 1,
@@ -722,7 +722,7 @@ describe('memoize-fs', () => {
     let d = 3
     const memFn = await memoize.fn(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      function (a: number, b: number, c: () => boolean) {
+      function (a: number, b: number, _: () => boolean) {
         return a + b + d
       },
       { cacheId: 'foobar' }
@@ -751,7 +751,7 @@ describe('memoize-fs', () => {
     let d = 3
     const memFn = await memoize.fn(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      function (a: number, b: number, c?: { [key: string]: () => boolean }) {
+      function (a: number, b: number, _?: { [key: string]: () => boolean }) {
         return a + b + d
       },
       { cacheId: 'foobar' }
@@ -813,7 +813,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
 
-      await memFn(function (err) {
+      await memFn(function (err: Error) {
         console.error(err)
       })
       const files = await readdir(path.join(cachePath, 'foobar'))
@@ -878,7 +878,7 @@ describe('memoize-fs', () => {
         },
         { cacheId: 'foobar' }
       )
-      await memFn(true, true, function (err) {
+      await memFn(true, true, function (err: Error | null) {
         if (err) {
           d = err
         }
@@ -886,7 +886,7 @@ describe('memoize-fs', () => {
       assert.ifError(d)
       d = undefined
       c = false
-      await memFn(true, true, function (err) {
+      await memFn(true, true, function (err: Error | null) {
         if (err) {
           d = err
         }
@@ -913,7 +913,7 @@ describe('memoize-fs', () => {
         },
         { cacheId: 'foobar' }
       )
-      await memFn(function (err) {
+      await memFn(function (err: Error | null) {
         if (err) {
           d = err
         }
@@ -921,7 +921,7 @@ describe('memoize-fs', () => {
       assert.ifError(d)
       d = undefined
       c = false
-      await memFn(function (err) {
+      await memFn(function (err: Error | null) {
         if (err) {
           d = err
         }
@@ -941,7 +941,7 @@ describe('memoize-fs', () => {
       let n = 0
       const memFn = await memoize.fn(function (
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        cb: (err: Error | null) => void
+        _: (err: Error | null) => void
       ) {
         return n++
       })
