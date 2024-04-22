@@ -18,11 +18,11 @@ export interface MemoizerOptions {
   noBody: boolean
   throwError: boolean
   retryOnInvalidCache: boolean
-  serialize: (val: unknown) => string
+  serialize: (val: unknown, isArgs: boolean) => string
   deserialize: (val: string) => unknown
 }
 
-function serialize(val: unknown) {
+function serialize(val: unknown, _isArgs: boolean) {
   const circRefColl: unknown[] = []
   return JSON.stringify(val, function (name, value) {
     if (typeof value === 'function') {
@@ -60,7 +60,7 @@ export function getCacheFilePath(
     fnStr = options.astBody ? JSON.stringify(fnStr) : fnStr
   }
 
-  const argsStr = options.serialize(args)
+  const argsStr = options.serialize(args, true)
   const hash = crypto
     .createHash('md5')
     .update(fnStr + argsStr + salt)
@@ -127,7 +127,7 @@ async function writeResult(
   let resultString
   if ((r && typeof r === 'object') || typeof r === 'string') {
     resultObj = { data: r }
-    resultString = optExt.serialize(resultObj)
+    resultString = optExt.serialize(resultObj, false)
   } else {
     resultString = '{"data":' + r + '}'
   }
