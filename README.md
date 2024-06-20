@@ -204,7 +204,7 @@ memoizer.fn(fnToMemoize, { salt: 'foobar' })
 
 ### maxAge
 
-With `maxAge` option you can ensure that cache for given call is cleared after a predefined period of time (in milliseconds).
+You can ensure that cache becomes invalid after a cache lifetime defined by the `maxAge` option is reached. memoize-fs uses [stats.mtimeMs](https://nodejs.org/api/fs.html#statsmtimems) (last modification time) when checking the age of the cache.
 
 ```js
 memoizer.fn(fnToMemoize, { maxAge: 10000 })
