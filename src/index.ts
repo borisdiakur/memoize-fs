@@ -24,7 +24,7 @@ export interface MemoizerOptions {
 
 function serialize(val: unknown) {
   const circRefColl: unknown[] = []
-  return JSON.stringify(val, function (name, value) {
+  return JSON.stringify(val, function (_name, value) {
     if (typeof value === 'function') {
       return // ignore arguments and attributes of type function silently
     }
@@ -131,15 +131,6 @@ async function writeResult(
   } else {
     resultString = '{"data":' + r + '}'
   }
-  if (optExt.maxAge) {
-    setTimeout(function () {
-      fs.rm(filePath, { recursive: true }).catch(function (err) {
-        if (err && err.code !== 'ENOENT') {
-          throw err
-        }
-      })
-    }, optExt.maxAge)
-  }
   try {
     await fs.writeFile(filePath, resultString)
     cb()
@@ -245,6 +236,33 @@ async function processFnAsync<FN>(
   ;(fn as (...args: unknown[]) => unknown).apply(null, args)
 }
 
+async function checkFileAgeAndRead(filePath: string, maxAge?: number): Promise<string | null> {
+  let fileHandle;
+  try {
+    fileHandle = await fs.open(filePath, 'r');
+
+    if (maxAge !== undefined) {
+      const stats = await fileHandle.stat();
+
+      const now = new Date().getTime();
+      const fileAge = now - stats.mtimeMs;
+
+      if (fileAge > maxAge) {
+        return null;
+      }
+    }
+
+    const content = await fs.readFile(filePath, { encoding: 'utf8' });
+    return content;
+  } catch (err) {
+    return null;
+  } finally {
+    if (fileHandle) {
+      await fileHandle.close();
+    }
+  }
+}
+
 export default function buildMemoizer(
   memoizerOptions: Partial<MemoizerOptions>
 ) {
@@ -321,8 +339,12 @@ export default function buildMemoizer(
           await processFn(fn, args, allOptions, filePath, resolve, reject)
         }
 
-        fs.readFile(filePath, { encoding: 'utf8' })
+        checkFileAgeAndRead(filePath, allOptions.maxAge)
           .then(function (data) {
+            if (data === null) {
+              return cacheAndReturn()
+            }
+
             const parsedData = parseResult(data, allOptions.deserialize)
             if (allOptions.retryOnInvalidCache && parsedData === undefined) {
               return cacheAndReturn()

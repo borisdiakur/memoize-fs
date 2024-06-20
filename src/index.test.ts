@@ -1245,7 +1245,7 @@ describe('memoize-fs', () => {
       )
     })
 
-    it('invalidates cache after timeout with maxAge option set', async () => {
+    it('checks cache age if maxAge option is set', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({ cachePath })
       let c = 3
@@ -1262,7 +1262,7 @@ describe('memoize-fs', () => {
         function (a: number, b: number) {
           return a + b + c
         },
-        { cacheId: 'foobar' }
+        { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
       assert.strictEqual(result, 6, 'expected result to strictly equal 7')
@@ -1274,7 +1274,7 @@ describe('memoize-fs', () => {
         function (a: number, b: number) {
           return a + b + c
         },
-        { cacheId: 'foobar' }
+        { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
@@ -1307,7 +1307,7 @@ describe('memoize-fs', () => {
         function (a: number, b: number) {
           return a + b + c
         },
-        { cacheId: 'foobar' }
+        { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
       assert.strictEqual(result, 6, 'expected result to strictly equal 7')
@@ -1319,7 +1319,7 @@ describe('memoize-fs', () => {
         function (a: number, b: number) {
           return a + b + c
         },
-        { cacheId: 'foobar' }
+        { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
