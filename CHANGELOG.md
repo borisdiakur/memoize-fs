@@ -1,3 +1,9 @@
+### 4.0.0 (2024-06-20)
+* __BREAKING CHANGE__: The `maxAge` option now ensures that the cache becomes invalid after the specified cache lifetime is reached based on `stats.mtimeMs` (last modification time of the cache file) instead of relying on an in memory timeout that invalidates the cache. This ensures that cache life times are evaluated correctly between multiple processes.
+
+#### How to upgrade
+If you are using the `maxAge` option, ensure that you add the option to every `memoizer.fn` call (if you have multiple) to reliably check cache validity. Most probably this is already the case in your application, and you don't need to change anything.
+
 ### 3.0.4 (2024-03-06)
 * style: improve typing by using Awaited instead of our custom EnsurePromise type
 
