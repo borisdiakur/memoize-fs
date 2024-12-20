@@ -1,3 +1,6 @@
+### 4.1.1 (2024-12-20)
+* build: fix build
+
 ### 4.1.0 (2024-12-20)
 * feat: cache hit check (#312)
 
