@@ -687,6 +687,32 @@ describe('memoize-fs', () => {
     )
   })
 
+  it('serializes reusable variables', async () => {
+    const cachePath = FIXTURE_CACHE
+    const memoize = memoizeFs({ cachePath })
+
+    const reuse = {
+      hello: 'world'
+    }
+
+    const memoizedFn = await memoize.fn(() => {
+      return {
+        a: reuse,
+        b: reuse
+      }
+    })
+
+    const result = await memoizedFn()
+
+    assert.strictEqual(result.a.hello, 'world')
+    assert.strictEqual(result.b.hello, 'world') // ok
+
+    const result2 = await memoizedFn()
+
+    assert.strictEqual(result2.a.hello, 'world')
+    assert.strictEqual(result2.b.hello, 'world')
+  })
+
   it('returns the cached result of a previously memoized promisified async function', async () => {
     const cachePath = FIXTURE_CACHE
     const memoize = memoizeFs({ cachePath })

@@ -23,20 +23,40 @@ export interface MemoizerOptions {
 }
 
 function serialize(val: unknown) {
-  const circRefColl: unknown[] = []
-  return JSON.stringify(val, function (_name, value) {
+  function serializeRec(value: unknown, refs = new WeakSet()) {
+    if (value && typeof value === 'object' && refs.has(value)) {
+      return
+    }
+
     if (typeof value === 'function') {
       return // ignore arguments and attributes of type function silently
     }
+
     if (typeof value === 'object' && value !== null) {
-      if (circRefColl.indexOf(value) !== -1) {
-        // circular reference has been found, discard key
-        return
+      if (refs.has(value)) return
+      refs.add(value)
+      if (Array.isArray(value)) {
+        const arr: Array<unknown> = []
+        for (let i = 0; i < value.length; i++) {
+          arr[i] = serializeRec(value[i], refs)
+        }
+        refs.delete(value)
+        return arr
       }
-      // store value in collection
-      circRefColl.push(value)
+
+      const obj: Record<string, unknown> = {}
+      for (const key in value) {
+        obj[key] = serializeRec(value[key as keyof object], refs)
+      }
+      refs.delete(value)
+      return obj
     }
+
     return value
+  }
+
+  return JSON.stringify(val, function (_name, value) {
+    return serializeRec(value)
   })
 }
 

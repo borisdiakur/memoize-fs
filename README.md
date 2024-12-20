@@ -249,7 +249,7 @@ memoizer.fn(fnToMemoize, { retryOnInvalidCache: true })
 ### serialize and deserialize
 
 These two options allows you to control how the serialization and deserialization process works.
-By default we use basic `JSON.stringify` and `JSON.parse`, but you may need more advanced stuff.
+By default we use basic `JSON.stringify` and `JSON.parse`, but you may need more advanced features (such as for serializing `BigInt` or `Symbol` values, `NaN` and the like).
 
 In the following example we are using [Yahoo's `serialize-javascript`](https://github.com/yahoo/serialize-javascript)
 to be able to cache properly the return result of memoized function containing a `function`.
@@ -315,6 +315,9 @@ Since memoize-fs is using JSON for serialization, __you should know__ how it wor
 - It ignores arguments and attributes of type function silently
 - It converts `NaN` to `undefined` silently
 - It converts all objects, no matter what class they were an instance of, to objects with prototype `Object` (see [#16](https://github.com/borisdiakur/memoize-fs/issues/16))
+- It converts `Boolean`, `Number`, `String`, and `BigInt` (obtainable via `Object()`) objects to the corresponding primitive values
+- It treats `Symbol` objects (obtainable via `Object()`) as plain objects
+- It throws when attempting to serialize `BigInt` values
 
 Some "limitations" can not (yet?) be worked around:
 
