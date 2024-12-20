@@ -22,6 +22,20 @@ export interface MemoizerOptions {
   deserialize: (val: string) => unknown
 }
 
+export interface Memoizer {
+  fn: <FN extends (...args: never) => unknown>(
+    fn: FN,
+    opt?: Partial<MemoizerOptions>
+  ) => Promise<(...args: Parameters<FN>) => Promise<Awaited<ReturnType<FN>>>>
+  readonly cacheHit: boolean | undefined
+  getCacheFilePath: (
+    fn: (...args: never) => unknown,
+    args: unknown[],
+    opt: Partial<MemoizerOptions>
+  ) => string
+  invalidate: (cacheId?: string) => Promise<void>
+}
+
 function serialize(val: unknown) {
   function serializeRec(value: unknown, refs = new WeakSet()) {
     if (value && typeof value === 'object' && refs.has(value)) {
@@ -182,20 +196,24 @@ async function processFn<FN extends (...args: unknown[]) => unknown>(
   allOptions: MemoizerOptions,
   filePath: string,
   resolve: (result: unknown) => void,
-  reject: (err: unknown) => void
+  reject: (err: unknown) => void,
+  cacheHitObj: {
+    cacheHit: boolean | undefined
+  }
 ) {
   let writtenResult: unknown
   let result: unknown
   try {
     result = await (fn as (...args: unknown[]) => unknown).apply(null, args)
   } catch (err) {
+    cacheHitObj.cacheHit = undefined
     reject(err)
     return
   }
   if (isPromise(result)) {
     // result is a promise instance
     const resolved = await result
-    writeResult(
+    await writeResult(
       resolved,
       function () {
         writtenResult = resolved
@@ -203,6 +221,7 @@ async function processFn<FN extends (...args: unknown[]) => unknown>(
       allOptions,
       filePath
     )
+    cacheHitObj.cacheHit = false
     resolve(writtenResult)
   }
 
@@ -217,6 +236,7 @@ async function processFn<FN extends (...args: unknown[]) => unknown>(
     allOptions,
     filePath
   )
+  cacheHitObj.cacheHit = false
   resolve(writtenResult)
 }
 
@@ -227,7 +247,10 @@ async function processFnAsync<FN>(
   allOptions: MemoizerOptions,
   filePath: string,
   resolve: (result: unknown) => void,
-  reject: (err: unknown) => void
+  reject: (err: unknown) => void,
+  cacheHitObj: {
+    cacheHit: boolean | undefined
+  }
 ) {
   args.pop()
 
@@ -237,6 +260,7 @@ async function processFnAsync<FN>(
     cbArgs.shift()
     if (cbErr) {
       // if we have an exception we don't cache anything
+      cacheHitObj.cacheHit = undefined
       return resolve(cbErr)
     }
     cbArgs.unshift(null)
@@ -244,12 +268,14 @@ async function processFnAsync<FN>(
       await writeResult(
         cbArgs,
         function () {
+          cacheHitObj.cacheHit = false
           resolve(fnaCb.apply(null, cbArgs))
         },
         allOptions,
         filePath
       )
     } catch (err) {
+      cacheHitObj.cacheHit = undefined
       reject(err)
     }
   })
@@ -288,7 +314,12 @@ async function checkFileAgeAndRead(
 
 export default function buildMemoizer(
   memoizerOptions: Partial<MemoizerOptions>
-) {
+): Memoizer {
+  const cacheHitObj: {
+    cacheHit: boolean | undefined
+  } = {
+    cacheHit: undefined
+  }
   const promiseCache: { [key: string]: Promise<unknown> } = {}
 
   // check args
@@ -355,11 +386,20 @@ export default function buildMemoizer(
               allOptions,
               filePath,
               resolve,
-              reject
+              reject,
+              cacheHitObj
             )
             return
           }
-          await processFn(fn, args, allOptions, filePath, resolve, reject)
+          await processFn(
+            fn,
+            args,
+            allOptions,
+            filePath,
+            resolve,
+            reject,
+            cacheHitObj
+          )
         }
 
         checkFileAgeAndRead(filePath, allOptions.maxAge)
@@ -374,18 +414,12 @@ export default function buildMemoizer(
             }
 
             function retrieveAndReturn() {
-              function processFnAsync() {
+              cacheHitObj.cacheHit = true
+              if (isAsync) {
                 resolve(fnaCb.apply(null, parsedData))
-              }
-
-              function processFn() {
+              } else {
                 resolve(parsedData)
               }
-
-              if (isAsync) {
-                return processFnAsync()
-              }
-              return processFn()
             }
 
             if (allOptions.force) {
@@ -402,6 +436,7 @@ export default function buildMemoizer(
               // Promise hasn't been cached yet.
               return cacheAndReturn()
             } else {
+              cacheHitObj.cacheHit = undefined
               reject(err)
             }
           })
@@ -451,6 +486,9 @@ export default function buildMemoizer(
       return memoizeFn(fn as never, opt) as unknown as (
         ...args: Parameters<FN>
       ) => Promise<Awaited<ReturnType<FN>>>
+    },
+    get cacheHit() {
+      return cacheHitObj.cacheHit
     },
     getCacheFilePath: getCacheFilePathBound,
     invalidate: invalidateCache

@@ -70,6 +70,7 @@ const memoizer = memoizeFs(options)
 console.log(memoizer)
 // => {
 //  fn: [AsyncFunction: fn],
+//  cacheHit: [Getter],
 //  getCacheFilePath: [Function: t],
 //  invalidate: [AsyncFunction: e]
 // }
@@ -90,7 +91,7 @@ const funAsync = function (a, b, cb) {
   }, 100);
 };
 
-const memFn = await memoize.fn(funAsync)
+const memFn = await memoizer.fn(funAsync)
 
 await memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); })
 await memFn(1, 2, function (err, sum) { if (err) { throw err; } console.log(sum); }) // cache hit
@@ -130,7 +131,7 @@ const funAsync = function (a, b, cb) {
 ## Types
 
 ```ts
-export interface MemoizerOptions {
+interface MemoizerOptions {
   cacheId: string
   cachePath: string
   salt: string
@@ -144,19 +145,12 @@ export interface MemoizerOptions {
   deserialize: (val: string) => unknown
 }
 
-export declare function getCacheFilePath(
-  fn: unknown,
-  args: unknown[],
-  opt: Partial<MemoizerOptions>
-): string
-
-export default function buildMemoizer(
-  memoizerOptions: Partial<MemoizerOptions>
-): {
+interface Memoizer {
   fn: <FN extends (...args: never) => unknown>(
     fn: FN,
     opt?: Partial<MemoizerOptions>
   ) => Promise<(...args: Parameters<FN>) => Promise<Awaited<ReturnType<FN>>>>
+  readonly cacheHit: boolean | undefined
   getCacheFilePath: (
     fn: (...args: never) => unknown,
     args: unknown[],
@@ -290,6 +284,38 @@ You can also pass the cacheId argument to the invalidate method. This way you on
 
 ```js
 memoizer.invalidate('foobar').then(() => { console.log('cache for "foobar" cleared') })
+```
+
+## Checking for a cache hit
+
+You can check if the result of a momoized function resulted from a cache hit using the `cacheHit` getter on the `Memoizer` instance. Initially, if no memoized function has been executed, `cacheHit` is `undefined`; if the result of a memozed function was read from a cache file, `cacheHit` is `true`; if the result was just written to a cache file, `cacheHit` is `true`; if an exceptions occured, `cacheHit` is `undefined`.
+
+```js
+import memoizeFs from 'memoize-fs'
+import assert from 'node:assert'
+
+const memoizer = memoizeFs({ cachePath: './some-cache' })
+
+;(async () => {
+  let idx = 0
+  const func = function foo(a, b) {
+    idx += a + b
+    return idx
+  }
+
+  const memoizedFn = await memoizer.fn(func)
+  assert.strictEqual(memoizer.cacheHit, undefined)
+  
+  const resultOne = await memoizedFn(1, 2)
+  assert.strictEqual(memoizer.cacheHit, false)
+  assert.strictEqual(resultOne, 3)
+  assert.strictEqual(idx, 3)
+
+  const resultTwo = await memoizedFn(1, 2)
+  assert.strictEqual(memoizer.cacheHit, true)
+  assert.strictEqual(resultTwo, 3)
+  assert.strictEqual(idx, 3)
+})()
 ```
 
 ## Serialization

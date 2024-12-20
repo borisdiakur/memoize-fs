@@ -275,6 +275,7 @@ describe('memoize-fs', () => {
       } catch (exc) {
         err = exc
       }
+      assert.strictEqual(memoize.cacheHit, undefined)
       assert.ok((err as unknown) instanceof Error)
       assert.ok((err as unknown as Error).message.includes('qux'))
 
@@ -307,6 +308,7 @@ describe('memoize-fs', () => {
       } catch (exc) {
         err = exc
       }
+      assert.strictEqual(memoize.cacheHit, undefined)
       assert.ok((err as unknown) instanceof Error)
       assert.ok((err as unknown as Error).message.includes('qux'))
 
@@ -331,9 +333,11 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath, 'foobar'))
@@ -357,9 +361,11 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', salt: 'qux' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath, 'foobar'))
@@ -380,9 +386,11 @@ describe('memoize-fs', () => {
         return a + b + c
       })
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath))
@@ -402,6 +410,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn()
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(
         c,
         1,
@@ -413,6 +422,7 @@ describe('memoize-fs', () => {
         'expected result to strictly equal undefined'
       )
       result = await memFn()
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(
         c,
         1,
@@ -445,9 +455,11 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath, 'foobar'))
@@ -468,9 +480,11 @@ describe('memoize-fs', () => {
         return a + b + c
       })
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath))
@@ -490,9 +504,11 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, '123', 'expected result to strictly equal 6')
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, '123', 'expected result to strictly equal 6')
 
       const files = await readdir(path.join(cachePath, 'foobar'))
@@ -515,12 +531,14 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(
         result,
         '"{"foo": "bar", "qux": "\'sas\'"quatch""}"3',
         'expected result to strictly equal "{"foo": "bar", "qux": "\'sas\'"quatch""}"3'
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(
         result,
         '"{"foo": "bar", "qux": "\'sas\'"quatch""}"3',
@@ -547,6 +565,7 @@ describe('memoize-fs', () => {
       { cacheId: 'foobar' }
     )
     let result = await memFn(undefined, undefined)
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.strictEqual(
       result,
@@ -555,6 +574,7 @@ describe('memoize-fs', () => {
     )
     c = true
     result = await memFn(undefined, undefined)
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.strictEqual(
       result,
@@ -580,9 +600,11 @@ describe('memoize-fs', () => {
       { cacheId: 'foobar' }
     )
     let result = await memFn(null, null)
+    assert.strictEqual(memoize.cacheHit, false)
     assert.strictEqual(result, null, 'expected result to strictly equal null')
     c = true
     result = await memFn(null, null)
+    assert.strictEqual(memoize.cacheHit, true)
     assert.strictEqual(result, null, 'expected result to strictly equal null')
     const files = await readdir(path.join(cachePath, 'foobar'))
     assert.strictEqual(
@@ -603,10 +625,12 @@ describe('memoize-fs', () => {
       { cacheId: 'foobar' }
     )
     let result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.ok(isNaN(result), 'expected result to be NaN')
     c = 3
     result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.strictEqual(result, undefined, 'expected result to be undefined')
     const files = await readdir(path.join(cachePath, 'foobar'))
@@ -647,6 +671,7 @@ describe('memoize-fs', () => {
       { cacheId: 'foobar' }
     )
     let result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.ok(Circ.prototype.isPrototypeOf(result.circ)) // eslint-disable-line no-prototype-builtins
     assert.strictEqual(result.circ.abc, 'Hello')
@@ -667,6 +692,7 @@ describe('memoize-fs', () => {
     } as never)
     c = 999
     result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.deepStrictEqual(result, {
       a: 1,
@@ -695,22 +721,24 @@ describe('memoize-fs', () => {
       hello: 'world'
     }
 
-    const memoizedFn = await memoize.fn(() => {
+    const memFn = await memoize.fn(() => {
       return {
         a: reuse,
         b: reuse
       }
     })
 
-    const result = await memoizedFn()
+    let result = await memFn()
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.strictEqual(result.a.hello, 'world')
-    assert.strictEqual(result.b.hello, 'world') // ok
+    assert.strictEqual(result.b.hello, 'world')
 
-    const result2 = await memoizedFn()
+    result = await memFn()
+    assert.strictEqual(memoize.cacheHit, true)
 
-    assert.strictEqual(result2.a.hello, 'world')
-    assert.strictEqual(result2.b.hello, 'world')
+    assert.strictEqual(result.a.hello, 'world')
+    assert.strictEqual(result.b.hello, 'world')
   })
 
   it('returns the cached result of a previously memoized promisified async function', async () => {
@@ -728,10 +756,12 @@ describe('memoize-fs', () => {
       { cacheId: 'foobar' }
     )
     let result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     c = 999
     result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     const files = await readdir(path.join(cachePath, 'foobar'))
@@ -756,11 +786,13 @@ describe('memoize-fs', () => {
     let result = await memFn(1, 2, function foo() {
       return true
     })
+    assert.strictEqual(memoize.cacheHit, false)
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     d = 999
     result = await memFn(1, 2, function bar() {
       return false
     })
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     const files = await readdir(path.join(cachePath, 'foobar'))
@@ -787,6 +819,7 @@ describe('memoize-fs', () => {
         return true
       }
     })
+    assert.strictEqual(memoize.cacheHit, false)
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     d = 999
@@ -795,6 +828,7 @@ describe('memoize-fs', () => {
         return false
       }
     })
+    assert.strictEqual(memoize.cacheHit, true)
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     const files = await readdir(path.join(cachePath, 'foobar'))
@@ -824,6 +858,7 @@ describe('memoize-fs', () => {
           (err as unknown as Error).message.includes('cb is not a function')
         )
       }
+      assert.strictEqual(memoize.cacheHit, undefined)
       assert.isTrue(throws)
     })
 
@@ -842,6 +877,7 @@ describe('memoize-fs', () => {
       await memFn(function (err: Error) {
         console.error(err)
       })
+      assert.strictEqual(memoize.cacheHit, undefined)
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
         files.length,
@@ -873,6 +909,7 @@ describe('memoize-fs', () => {
         }
         d = sum
       })
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(d, 6, 'expected d to strictly equal 6')
       d = undefined
       c = 999
@@ -882,6 +919,7 @@ describe('memoize-fs', () => {
         }
         d = sum
       })
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(d, 6, 'expected result to strictly equal 6')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -909,6 +947,7 @@ describe('memoize-fs', () => {
           d = err
         }
       })
+      assert.strictEqual(memoize.cacheHit, false)
       assert.ifError(d)
       d = undefined
       c = false
@@ -917,6 +956,7 @@ describe('memoize-fs', () => {
           d = err
         }
       })
+      assert.strictEqual(memoize.cacheHit, true)
       assert.ifError(d)
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -944,6 +984,7 @@ describe('memoize-fs', () => {
           d = err
         }
       })
+      assert.strictEqual(memoize.cacheHit, false)
       assert.ifError(d)
       d = undefined
       c = false
@@ -952,6 +993,7 @@ describe('memoize-fs', () => {
           d = err
         }
       })
+      assert.strictEqual(memoize.cacheHit, true)
       assert.ifError(d)
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -972,6 +1014,7 @@ describe('memoize-fs', () => {
         return n++
       })
       await Promise.all([memFn(() => {}), memFn(() => {})])
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(n, 1)
     })
   })
@@ -991,6 +1034,7 @@ describe('memoize-fs', () => {
         .then(function (memFn) {
           return memFn(1, 2)
         })
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       const memFn = await memoize.fn(
         function (a: number, b: number) {
@@ -1000,6 +1044,7 @@ describe('memoize-fs', () => {
       )
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1024,6 +1069,7 @@ describe('memoize-fs', () => {
       .then(function (memFn) {
         return memFn(1, 2)
       })
+    assert.strictEqual(memoize.cacheHit, false)
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
     const memFn = await memoize.fn(
       function (a: number, b: number) {
@@ -1033,6 +1079,7 @@ describe('memoize-fs', () => {
     )
     c = 4
     result = await memFn(1, 2)
+    assert.strictEqual(memoize.cacheHit, false)
     assert.strictEqual(result, 7, 'expected result to strictly equal 7')
     const files = await readdir(path.join(cachePath, 'foobar'))
     assert.strictEqual(
@@ -1058,6 +1105,7 @@ describe('memoize-fs', () => {
         }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       memFn = await memoize.fn(
         function bar(a: number, b: number) {
@@ -1071,6 +1119,7 @@ describe('memoize-fs', () => {
       )
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1094,6 +1143,7 @@ describe('memoize-fs', () => {
         }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       memFn = await memoize.fn(
         function bar(a: number, b: number) {
@@ -1106,6 +1156,7 @@ describe('memoize-fs', () => {
       )
       c = 999
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 1002, 'expected result to strictly equal 1002')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1132,6 +1183,7 @@ describe('memoize-fs', () => {
         }
       )
       let result = await memFn()
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(
         result,
         'string',
@@ -1149,6 +1201,7 @@ describe('memoize-fs', () => {
         }
       )
       result = await memFn()
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(
         result,
         'string',
@@ -1173,14 +1226,17 @@ describe('memoize-fs', () => {
       })
 
       let result = await memFn(1)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 1, 'should be 1')
       assert.strictEqual(c, 1, 'should be 1')
 
       result = await memFn(1)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 1, 'should be memoized 1')
       assert.strictEqual(c, 1, 'should still be 1')
 
       result = await memFn(2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 2, 'should be 2')
       assert.strictEqual(c, 2, 'should be 2')
     })
@@ -1222,6 +1278,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       await memoize.invalidate('foobar')
       c = 4
@@ -1232,6 +1289,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1252,6 +1310,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       await memoize.invalidate()
       c = 4
@@ -1262,6 +1321,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1282,6 +1342,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       c = 3
       memFn = await memoize.fn(
@@ -1291,6 +1352,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, true)
       assert.strictEqual(result, 6, 'expected result to strictly equal 7')
       await new Promise(function (resolve) {
         setTimeout(resolve, 20)
@@ -1303,6 +1365,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1323,6 +1386,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       let result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 6')
       await memoize.invalidate('foobar')
       new Promise(function (resolve) {
@@ -1336,6 +1400,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 6, 'expected result to strictly equal 7')
       await new Promise(function (resolve) {
         setTimeout(resolve, 20)
@@ -1348,6 +1413,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar', maxAge: 10 }
       )
       result = await memFn(1, 2)
+      assert.strictEqual(memoize.cacheHit, false)
       assert.strictEqual(result, 7, 'expected result to strictly equal 7')
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1373,10 +1439,13 @@ describe('memoize-fs', () => {
       const options = { cacheId: 'foobar', retryOnInvalidCache: true }
       let memFn = await memoize.fn(fnToMemo, options)
       await memFn(args[0], args[1])
+      assert.strictEqual(memoize.cacheHit, false)
+
       const cacheFilePath = memoize.getCacheFilePath(fnToMemo, args, options)
       await writeFile(cacheFilePath, '}{') // write some invalid JSON
       memFn = await memoize.fn(fnToMemo, options)
       await memFn(args[0], args[1])
+      assert.strictEqual(memoize.cacheHit, false)
       assert.equal(timesCalled, 2)
     })
   })
@@ -1428,6 +1497,7 @@ describe('memoize-fs', () => {
         { cacheId: 'foobar' }
       )
       await memFn()
+      assert.strictEqual(memoize.cacheHit, false)
 
       const files = await readdir(path.join(cachePath, 'foobar'))
       assert.strictEqual(
@@ -1453,6 +1523,7 @@ describe('memoize-fs', () => {
       } catch (err) {
         throws = true
       }
+      assert.strictEqual(memoize.cacheHit, undefined)
       assert.ok(throws)
     })
   })
