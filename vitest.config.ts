@@ -3,7 +3,7 @@ export default defineConfig({
   test: {
     testTimeout: 100,
     coverage: {
-      reporter: ['text', 'lcov'],
-    },
-  },
+      reporter: ['text', 'lcov']
+    }
+  }
 })

@@ -5,7 +5,7 @@ import { parse } from 'meriyah'
 
 const serializer = {
   serialize,
-  deserialize,
+  deserialize
 }
 
 export interface MemoizerOptions {
@@ -236,29 +236,32 @@ async function processFnAsync<FN>(
   ;(fn as (...args: unknown[]) => unknown).apply(null, args)
 }
 
-async function checkFileAgeAndRead(filePath: string, maxAge?: number): Promise<string | null> {
-  let fileHandle;
+async function checkFileAgeAndRead(
+  filePath: string,
+  maxAge?: number
+): Promise<string | null> {
+  let fileHandle
   try {
-    fileHandle = await fs.open(filePath, 'r');
+    fileHandle = await fs.open(filePath, 'r')
 
     if (maxAge !== undefined) {
-      const stats = await fileHandle.stat();
+      const stats = await fileHandle.stat()
 
-      const now = new Date().getTime();
-      const fileAge = now - stats.mtimeMs;
+      const now = new Date().getTime()
+      const fileAge = now - stats.mtimeMs
 
       if (fileAge > maxAge) {
-        return null;
+        return null
       }
     }
 
-    const content = await fs.readFile(filePath, { encoding: 'utf8' });
-    return content;
+    const content = await fs.readFile(filePath, { encoding: 'utf8' })
+    return content
   } catch (err) {
-    return null;
+    return null
   } finally {
     if (fileHandle) {
-      await fileHandle.close();
+      await fileHandle.close()
     }
   }
 }
@@ -298,7 +301,7 @@ export default function buildMemoizer(
     const allOptions = {
       cacheId: './',
       ...memoizerOptions,
-      ...memoizeOptions,
+      ...memoizeOptions
     } as MemoizerOptions
     checkOptions(allOptions)
 
@@ -415,7 +418,7 @@ export default function buildMemoizer(
     return getCacheFilePath(fn, args, {
       ...memoizerOptions,
       ...opt,
-      cachePath: memoizerOptions.cachePath,
+      cachePath: memoizerOptions.cachePath
     })
   }
 
@@ -430,6 +433,6 @@ export default function buildMemoizer(
       ) => Promise<Awaited<ReturnType<FN>>>
     },
     getCacheFilePath: getCacheFilePathBound,
-    invalidate: invalidateCache,
+    invalidate: invalidateCache
   }
 }

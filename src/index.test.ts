@@ -7,7 +7,7 @@ import {
   writeFile,
   readFile,
   access,
-  constants,
+  constants
 } from 'fs/promises'
 import memoizeFs, { getCacheFilePath, type MemoizerOptions } from './index.js'
 import * as path from 'path'
@@ -25,7 +25,7 @@ describe('memoize-fs', () => {
       try {
         memoizeFs({
           cachePath: FIXTURE_CACHE,
-          serialize: 123,
+          serialize: 123
         } as unknown as MemoizerOptions)
       } catch (exc) {
         err = exc
@@ -42,7 +42,7 @@ describe('memoize-fs', () => {
       try {
         memoizeFs({
           cachePath: FIXTURE_CACHE,
-          deserialize: 123,
+          deserialize: 123
         } as unknown as MemoizerOptions)
       } catch (exc) {
         err = exc
@@ -100,7 +100,7 @@ describe('memoize-fs', () => {
       try {
         memoizeFs({
           cachePath: 'yolo',
-          retryOnInvalidCache: 'yes',
+          retryOnInvalidCache: 'yes'
         } as unknown as MemoizerOptions)
       } catch (exc) {
         err = exc
@@ -154,7 +154,7 @@ describe('memoize-fs', () => {
           abc,
           foo() {
             return 100 + abc
-          },
+          }
         }
       }
 
@@ -180,7 +180,7 @@ describe('memoize-fs', () => {
 
       await rm(cachePath, {
         recursive: true,
-        force: true,
+        force: true
       })
     })
     it('throws with invalid cache path', async () => {
@@ -261,7 +261,7 @@ describe('memoize-fs', () => {
       const cachePath = FIXTURE_CACHE
       let err
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
 
       const memFn = await memoize.fn(
@@ -290,7 +290,7 @@ describe('memoize-fs', () => {
       const cachePath = FIXTURE_CACHE
       let err
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
 
       const memFn = await memoize.fn(
@@ -321,7 +321,7 @@ describe('memoize-fs', () => {
     it('caches the result of a memoized function on first execution to its cache folder', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(
@@ -347,7 +347,7 @@ describe('memoize-fs', () => {
     it('caches the result of a memoized function on first execution to its cache folder with salt', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(
@@ -373,7 +373,7 @@ describe('memoize-fs', () => {
     it('caches the result of a memoized function on first execution to the root cache folder if no cache id is provided', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(function (a: number, b: number) {
@@ -392,7 +392,7 @@ describe('memoize-fs', () => {
     it('returns the cached result with the value undefined of a previously memoized function with return type void', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 0
       const memFn = await memoize.fn(
@@ -435,7 +435,7 @@ describe('memoize-fs', () => {
     it('returns the cached result of type number of a previously memoized function', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(
@@ -461,7 +461,7 @@ describe('memoize-fs', () => {
     it('returns the cached result of type number of a previously memoized function cached in the root cache folder if no cache id is provided', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(function (a: number, b: number) {
@@ -480,7 +480,7 @@ describe('memoize-fs', () => {
     it('returns the cached result of type string of a previously memoized function', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       let c = 3
       const memFn = await memoize.fn(
@@ -506,7 +506,7 @@ describe('memoize-fs', () => {
     it('returns the cached result of type string with lots of quotation marks in it of a previously memoized function', async () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({
-        cachePath,
+        cachePath
       })
       const memFn = await memoize.fn(
         function (a: number, b: number) {
@@ -639,9 +639,9 @@ describe('memoize-fs', () => {
           d: {
             e: [3, 2, 1],
             f: null,
-            g: 'qux',
+            g: 'qux'
           },
-          circ: new Circ(),
+          circ: new Circ()
         }
       },
       { cacheId: 'foobar' }
@@ -662,8 +662,8 @@ describe('memoize-fs', () => {
       d: {
         e: [3, 2, 1],
         f: null,
-        g: 'qux',
-      },
+        g: 'qux'
+      }
     } as never)
     c = 999
     result = await memFn(1, 2)
@@ -675,9 +675,9 @@ describe('memoize-fs', () => {
       d: {
         e: [3, 2, 1],
         f: null,
-        g: 'qux',
+        g: 'qux'
       },
-      circ: { abc: 'Hello' },
+      circ: { abc: 'Hello' }
     } as never)
     const files = await readdir(path.join(cachePath, 'foobar'))
     assert.strictEqual(
@@ -759,7 +759,7 @@ describe('memoize-fs', () => {
     let result = await memFn(1, 2, {
       foo: function () {
         return true
-      },
+      }
     })
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
@@ -767,7 +767,7 @@ describe('memoize-fs', () => {
     result = await memFn(1, 2, {
       bar: function () {
         return false
-      },
+      }
     })
 
     assert.strictEqual(result, 6, 'expected result to strictly equal 6')
@@ -1028,7 +1028,7 @@ describe('memoize-fs', () => {
         {
           cacheId: 'foobar',
           salt: 'qux',
-          noBody: true,
+          noBody: true
         }
       )
       let result = await memFn(1, 2)
@@ -1040,7 +1040,7 @@ describe('memoize-fs', () => {
         {
           cacheId: 'foobar',
           salt: 'qux',
-          noBody: true,
+          noBody: true
         }
       )
       c = 999
@@ -1064,7 +1064,7 @@ describe('memoize-fs', () => {
         },
         {
           cacheId: 'foobar',
-          salt: 'qux',
+          salt: 'qux'
         }
       )
       let result = await memFn(1, 2)
@@ -1075,7 +1075,7 @@ describe('memoize-fs', () => {
         },
         {
           cacheId: 'foobar',
-          salt: 'qux',
+          salt: 'qux'
         }
       )
       c = 999
@@ -1102,7 +1102,7 @@ describe('memoize-fs', () => {
         {
           cacheId: 'foobar',
           salt: 'qux',
-          astBody: true,
+          astBody: true
         }
       )
       let result = await memFn()
@@ -1119,7 +1119,7 @@ describe('memoize-fs', () => {
         {
           cacheId: 'foobar',
           salt: 'qux',
-          astBody: true,
+          astBody: true
         }
       )
       result = await memFn()
@@ -1164,7 +1164,7 @@ describe('memoize-fs', () => {
     it('returns a path', async () => {
       const actual = getCacheFilePath(function () {}, [], {
         cacheId: './',
-        cachePath: '/',
+        cachePath: '/'
       })
       const expected = '/b5d63bae8e80bd56f9317d1e3c969915'
       assert.strictEqual(actual, expected)
@@ -1176,7 +1176,7 @@ describe('memoize-fs', () => {
         function () {},
         [],
         {
-          cacheId: './',
+          cacheId: './'
         }
       )
       const expected = '/b3e831410f20372483b78b2a4dd28c4c'
@@ -1417,7 +1417,7 @@ describe('memoize-fs', () => {
         },
         {
           cacheId: 'foobar',
-          force: true,
+          force: true
         }
       )
 
@@ -1436,13 +1436,13 @@ describe('memoize-fs', () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({ cachePath })
 
-      const syncFunction: () => number= () => 1;
-      const asyncFunction: () => Promise<number> = async () => 1;
+      const syncFunction: () => number = () => 1
+      const asyncFunction: () => Promise<number> = async () => 1
 
-      let memFn: () => Promise<number>;
-      memFn = await memoize.fn(syncFunction);
-      memFn = await memoize.fn(asyncFunction);
-      memFn;
+      let memFn: () => Promise<number>
+      memFn = await memoize.fn(syncFunction)
+      memFn = await memoize.fn(asyncFunction)
+      memFn
     })
   })
 })
