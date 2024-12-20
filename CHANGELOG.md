@@ -1,3 +1,6 @@
+### 4.0.1 (2024-12-20)
+* fix: reusable variables are serialized incorrectly (#307)
+
 ### 4.0.0 (2024-06-20)
 * __BREAKING CHANGE__: The `maxAge` option now ensures that the cache becomes invalid after the specified cache lifetime is reached based on `stats.mtimeMs` (last modification time of the cache file) instead of relying on an in memory timeout that invalidates the cache. This ensures that cache life times are evaluated correctly between multiple processes.
 
