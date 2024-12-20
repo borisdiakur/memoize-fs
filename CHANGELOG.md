@@ -1,3 +1,6 @@
+### 4.1.0 (2024-12-20)
+* feat: cache hit check (#312)
+
 ### 4.0.1 (2024-12-20)
 * fix: reusable variables are serialized incorrectly (#307)
 
