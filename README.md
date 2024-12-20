@@ -288,7 +288,7 @@ memoizer.invalidate('foobar').then(() => { console.log('cache for "foobar" clear
 
 ## Checking for a cache hit
 
-You can check if the result of a momoized function resulted from a cache hit using the `cacheHit` getter on the `Memoizer` instance. Initially, if no memoized function has been executed, `cacheHit` is `undefined`; if the result of a memozed function was read from a cache file, `cacheHit` is `true`; if the result was just written to a cache file, `cacheHit` is `true`; if an exceptions occured, `cacheHit` is `undefined`.
+You can check if the result of a momoized function resulted from a cache hit using the `cacheHit` getter on the `Memoizer` instance. Initially, if no memoized function has been executed, `cacheHit` is `undefined`; if the result was just written to a cache file, `cacheHit` is `false`; if the result of a memozed function was read from a cache file, `cacheHit` is `true`; if an exceptions occured, `cacheHit` is `undefined`.
 
 ```js
 import memoizeFs from 'memoize-fs'
