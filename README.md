@@ -3,7 +3,6 @@
 Node.js solution for memoizing/caching function results on the file system
 
 [![Coverage Status](https://coveralls.io/repos/borisdiakur/memoize-fs/badge.svg?branch=main)](https://coveralls.io/r/borisdiakur/memoize-fs?branch=main)
-[![npm version](https://badge.fury.io/js/memoize-fs.svg)](http://badge.fury.io/js/memoize-fs)
 
 ## Motivation
 Sometimes you have to persist cached function calls, but you do not want to deal with an extra process (i.e. managing a Redis store).
