@@ -43,7 +43,7 @@
     "npm": ">= 6.0.0"
   },
   "dependencies": {
-    "meriyah": "^4.3.4"
+    "meriyah": "^6.0.4"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
