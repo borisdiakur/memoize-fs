@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { it, assert, describe, beforeEach } from 'vitest'
 import {
   readdir,
@@ -12,8 +11,9 @@ import {
 import memoizeFs, { getCacheFilePath, type MemoizerOptions } from './index.js'
 import * as path from 'path'
 import serialize from 'serialize-javascript'
+import * as process from 'node:process'
 
-const FIXTURE_CACHE = path.join(__dirname, '..', 'fixture-cache')
+const FIXTURE_CACHE = path.join(process.cwd(), 'fixture-cache')
 
 describe('memoize-fs', () => {
   beforeEach(async () => {
@@ -142,7 +142,6 @@ describe('memoize-fs', () => {
     it('passes custom serialize and deserialize through memoizeFS options', async () => {
       const cachePath = FIXTURE_CACHE
       function deserialize(serializedJavascript: string) {
-        // eslint-disable-next-line no-eval
         return eval(`(() => (${serializedJavascript}))()`).data
       }
 
@@ -189,7 +188,7 @@ describe('memoize-fs', () => {
         const cachePath = '/öäüß'
         const memoize = memoizeFs({ cachePath })
         await memoize.fn(() => {}, { cacheId: 'foobar' })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -205,7 +204,7 @@ describe('memoize-fs', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         await memoize.fn()
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -216,7 +215,7 @@ describe('memoize-fs', () => {
         const cachePath = FIXTURE_CACHE
         const memoize = memoizeFs({ cachePath })
         await memoize.fn('foobar' as unknown as () => void)
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -227,7 +226,7 @@ describe('memoize-fs', () => {
         const cachePath = FIXTURE_CACHE
         const memoize = memoizeFs({ cachePath })
         await memoize.fn(() => {}, { salt: true as unknown as string })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -238,7 +237,7 @@ describe('memoize-fs', () => {
         const cachePath = FIXTURE_CACHE
         const memoize = memoizeFs({ cachePath })
         await memoize.fn(() => {}, { cacheId: true as unknown as string })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -249,7 +248,7 @@ describe('memoize-fs', () => {
         const cachePath = FIXTURE_CACHE
         const memoize = memoizeFs({ cachePath })
         await memoize.fn(() => {}, { maxAge: true as unknown as number })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -654,7 +653,6 @@ describe('memoize-fs', () => {
       }
     }
     const memFn = await memoize.fn(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       function (a: unknown, b: unknown) {
         return {
           a: a,
@@ -777,7 +775,6 @@ describe('memoize-fs', () => {
     const memoize = memoizeFs({ cachePath })
     let d = 3
     const memFn = await memoize.fn(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       function (a: number, b: number, _: () => boolean) {
         return a + b + d
       },
@@ -808,7 +805,6 @@ describe('memoize-fs', () => {
     const memoize = memoizeFs({ cachePath })
     let d = 3
     const memFn = await memoize.fn(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       function (a: number, b: number, _?: { [key: string]: () => boolean }) {
         return a + b + d
       },
@@ -1007,10 +1003,7 @@ describe('memoize-fs', () => {
       const cachePath = FIXTURE_CACHE
       const memoize = memoizeFs({ cachePath })
       let n = 0
-      const memFn = await memoize.fn(function (
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        _: (err: Error | null) => void
-      ) {
+      const memFn = await memoize.fn(function (_: (err: Error | null) => void) {
         return n++
       })
       await Promise.all([memFn(() => {}), memFn(() => {})])
@@ -1173,8 +1166,8 @@ describe('memoize-fs', () => {
       const memoize = memoizeFs({ cachePath })
       let memFn = await memoize.fn(
         function foo() {
-          // double quoted
-          return 'string' // eslint-disable-line quotes
+          // prettier-ignore
+          return "string" // double-quoted
         },
         {
           cacheId: 'foobar',
@@ -1457,7 +1450,7 @@ describe('memoize-fs', () => {
       let throws = false
       try {
         await memoize.invalidate(true as unknown as string)
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -1469,7 +1462,7 @@ describe('memoize-fs', () => {
       let throws = false
       try {
         await memoize.fn(function () {}, { cacheId: 'README.md' })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.ok(throws)
@@ -1481,7 +1474,7 @@ describe('memoize-fs', () => {
       let throws = false
       try {
         await memoize.fn(function () {}, { cacheId: 'README.md' })
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.isFalse(throws)
@@ -1520,7 +1513,7 @@ describe('memoize-fs', () => {
       let throws = false
       try {
         await memFn()
-      } catch (err) {
+      } catch (_err) {
         throws = true
       }
       assert.strictEqual(memoize.cacheHit, undefined)
@@ -1539,7 +1532,7 @@ describe('memoize-fs', () => {
       let memFn: () => Promise<number>
       memFn = await memoize.fn(syncFunction)
       memFn = await memoize.fn(asyncFunction)
-      memFn
+      assert.ok(memFn)
     })
   })
 })

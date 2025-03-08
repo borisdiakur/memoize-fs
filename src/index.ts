@@ -142,7 +142,9 @@ async function initCache(
   } catch (err) {
     if (
       err &&
-      (err as unknown as NodeJS.ErrnoException).code === 'EEXIST' &&
+      err instanceof Error &&
+      'code' in err &&
+      err.code === 'EEXIST' &&
       cacheOptions?.throwError === false
     ) {
       return
@@ -179,7 +181,7 @@ function parseResult(
 ) {
   try {
     return deserialize(resultString)
-  } catch (e) {
+  } catch (_err) {
     return undefined
   }
 }
@@ -303,7 +305,7 @@ async function checkFileAgeAndRead(
 
     const content = await fs.readFile(filePath, { encoding: 'utf8' })
     return content
-  } catch (err) {
+  } catch (_err) {
     return null
   } finally {
     if (fileHandle) {
