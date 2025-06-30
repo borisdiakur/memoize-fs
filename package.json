@@ -63,7 +63,7 @@
     "prettier": "^3.5.3",
     "serialize-javascript": "^6.0.2",
     "typescript": "^5.8.2",
-    "vite": "^6.2.1",
+    "vite": "^7.0.0",
     "vitest": "^3.0.8"
   },
   "license": "MIT",
