@@ -16,6 +16,7 @@ http://en.wikipedia.org/wiki/Memoization
 * Supports memoization of [__asynchronous functions__](#memoizing-asynchronous-functions)
 * Supports memoization of [__promisified functions__](#memoizing-promisified-functions)
 * Cache [__can be invalidated manually__](#manual-cache-invalidation)
+* Coalesces concurrent requests with identical arguments so only one computation runs
 
 ## Installation
 
