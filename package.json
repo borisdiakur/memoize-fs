@@ -61,7 +61,7 @@
     "eslint-plugin-promise": "^7.2.1",
     "open-cli": "^8.0.0",
     "prettier": "^3.5.3",
-    "serialize-javascript": "^6.0.2",
+    "serialize-javascript": "^7.0.0",
     "typescript": "^5.8.2",
     "vite": "^7.0.0",
     "vitest": "^3.0.8"
